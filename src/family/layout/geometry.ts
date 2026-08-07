@@ -21,6 +21,13 @@ export const MARRIAGE_DROP = 18;
 
 export const CARD_STEP = PERSON_WIDTH + PARTNER_GAP;
 
+/** A stretch of the horizontal: a run of line, or the reach of a block on a row. */
+export type Span = { left: number; right: number };
+
+export function widthOf(span: Span): number {
+  return span.right - span.left;
+}
+
 export function rowY(row: number): number {
   return row * (PERSON_HEIGHT + ROW_GAP);
 }

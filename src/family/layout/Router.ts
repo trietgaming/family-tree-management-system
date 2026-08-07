@@ -6,6 +6,8 @@ import {
   PERSON_HEIGHT,
   isNear,
   rowY,
+  widthOf,
+  type Span,
 } from "./geometry";
 import type { Marriage } from "./Marriage";
 import type { Junction, Point } from "./types";
@@ -19,7 +21,6 @@ export type Route = {
   points: Point[];
 };
 
-type Span = { left: number; right: number };
 type Claim = Span & { marriage: Marriage; row: number };
 
 /**
@@ -210,10 +211,6 @@ function groupByRow<T extends { row: number }>(claims: T[]): Map<number, T[]> {
 /** The horizontal reach of a run, from its leftmost point to its rightmost. */
 function spanOf(xs: number[]): Span {
   return { left: Math.min(...xs), right: Math.max(...xs) };
-}
-
-function widthOf(span: Span): number {
-  return span.right - span.left;
 }
 
 /**

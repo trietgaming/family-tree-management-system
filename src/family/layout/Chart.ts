@@ -1,5 +1,5 @@
 import { isDeclaredUnion, parentIdsOf, type FamilyModel, type Union } from "../model";
-import { Block } from "./Block";
+import { Block, type Placement } from "./Block";
 import { Card } from "./Card";
 import { assignGenerations } from "./generations";
 import {
@@ -10,6 +10,7 @@ import {
   TREE_GAP,
   UNION_SIZE,
   mean,
+  type Span,
 } from "./geometry";
 import { Household } from "./Household";
 import { Marriage } from "./Marriage";
@@ -215,19 +216,69 @@ export class Chart {
     }
   }
 
+  /**
+   * Gives every tree a column.
+   *
+   * Trees are not laid end to end, because a tree is only as wide as its widest
+   * row and is usually far narrower on the others — a couple whose descendants
+   * fan out over the whole drawing still take two cards on their own row. So a
+   * tree is put where it is pulled, and only has to keep clear of what is
+   * already drawn *on the rows it actually occupies*.
+   */
   private placeColumns(): void {
-    let cursor = 0;
+    /** Row, and the stretches of it already spoken for. */
+    const taken = new Map<number, Span[]>();
+    const settled = new Map<string, Card>();
+    let after = 0;
 
     for (const root of this.roots) {
       const block = this.lay(root);
-      block.commit(cursor);
-      cursor += block.width + TREE_GAP;
+      const held = block.listOffsets();
+
+      // A tree joined to nothing yet drawn has nowhere in particular to be, so
+      // it goes after the rest and the document's order is what shows.
+      const wanted = this.pullOf(held, settled) ?? after - leftEdgeOf(held);
+
+      block.commit(findColumn(wanted, held, taken));
+
+      for (const { card } of held) {
+        taken.set(card.row, [...(taken.get(card.row) ?? []), { left: card.left, right: card.right }]);
+        settled.set(card.id, card);
+        after = Math.max(after, card.right + TREE_GAP);
+      }
     }
 
     // Everything is measured from wherever the first tree started; slide the
     // whole drawing so the leftmost card sits on zero.
     const left = Math.min(...[...this.cards.values()].map((card) => card.left), 0);
     for (const card of this.cards.values()) card.x -= left;
+  }
+
+  /** Everyone this person is drawn joined to: parents, partners, children. */
+  private kinOf(personId: string): string[] {
+    const unions = this.model.unionsOf.get(personId) ?? [];
+
+    return [
+      ...parentIdsOf(this.model, personId),
+      ...unions.flatMap((union) => [...union.partnerIds, ...union.childIds]),
+    ].filter((id) => id !== personId);
+  }
+
+  /**
+   * Where a tree would like to start, so that its lines out are as short as
+   * they can be: the average of what each of its cards is joined to, counted
+   * back to the tree's own left edge. Null when it is joined to nothing drawn
+   * yet, which is every tree that stands on its own.
+   */
+  private pullOf(held: Placement[], settled: Map<string, Card>): number | null {
+    const wishes = held.flatMap(({ card, dx }) =>
+      this.kinOf(card.id)
+        .map((id) => settled.get(id))
+        .filter((other): other is Card => other !== undefined)
+        .map((other) => other.x - dx),
+    );
+
+    return mean(wishes);
   }
 
   /**
@@ -352,6 +403,79 @@ export class Chart {
       generations: new Map([...this.cards].map(([id, card]) => [id, card.row])),
     };
   }
+}
+
+/** How far the leftmost card of a block sits from the block's own origin. */
+function leftEdgeOf(held: Placement[]): number {
+  return Math.min(...held.map(({ dx }) => dx)) - PERSON_WIDTH / 2;
+}
+
+/** How far a block reaches on each row it occupies, from its own origin. */
+function reachOf(held: Placement[]): Map<number, Span> {
+  const rows = new Map<number, Span>();
+
+  for (const { card, dx } of held) {
+    const known = rows.get(card.row);
+    const left = dx - PERSON_WIDTH / 2;
+    const right = dx + PERSON_WIDTH / 2;
+
+    rows.set(
+      card.row,
+      known
+        ? { left: Math.min(known.left, left), right: Math.max(known.right, right) }
+        : { left, right },
+    );
+  }
+
+  return rows;
+}
+
+/**
+ * The starting positions that would stand a block on somebody already drawn.
+ *
+ * Read as: the block reaches from `span.left` to `span.right` on this row, so
+ * starting anywhere in this stretch would land that reach on an occupied one.
+ */
+function blockedColumns(held: Placement[], taken: Map<number, Span[]>): Span[] {
+  const blocked: Span[] = [];
+
+  for (const [row, span] of reachOf(held)) {
+    for (const other of taken.get(row) ?? []) {
+      blocked.push({
+        left: other.left - span.right - TREE_GAP,
+        right: other.right - span.left + TREE_GAP,
+      });
+    }
+  }
+
+  return blocked;
+}
+
+/** Overlapping and touching stretches joined up, so what is left is separated. */
+function mergeSpans(spans: Span[]): Span[] {
+  const merged: Span[] = [];
+
+  for (const span of [...spans].sort((a, b) => a.left - b.left)) {
+    const last = merged[merged.length - 1];
+
+    if (last && span.left <= last.right) last.right = Math.max(last.right, span.right);
+    else merged.push({ ...span });
+  }
+
+  return merged;
+}
+
+/**
+ * The position nearest the one wanted that stands on nobody. One step is
+ * enough: the stretches have been merged, so the edge of the one in the way is
+ * outside all of them.
+ */
+function findColumn(wanted: number, held: Placement[], taken: Map<number, Span[]>): number {
+  const blocked = mergeSpans(blockedColumns(held, taken));
+  const inTheWay = blocked.find((span) => wanted > span.left && wanted < span.right);
+  if (!inTheWay) return wanted;
+
+  return wanted - inTheWay.left <= inTheWay.right - wanted ? inTheWay.left : inTheWay.right;
 }
 
 /**

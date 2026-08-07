@@ -1,7 +1,9 @@
 import type { Card } from "./Card";
 import { PERSON_WIDTH } from "./geometry";
 
-type Held = { card: Card; dx: number };
+/** A card and where it sits, measured from the left edge of the block holding it. */
+export type Placement = { card: Card; dx: number };
+
 type Nested = { block: Block; dx: number };
 
 /**
@@ -17,10 +19,10 @@ export class Block {
   readonly width: number;
   readonly anchor: number;
 
-  private readonly held: Held[];
+  private readonly held: Placement[];
   private readonly nested: Nested[];
 
-  private constructor(width: number, anchor: number, held: Held[], nested: Nested[]) {
+  private constructor(width: number, anchor: number, held: Placement[], nested: Nested[]) {
     this.width = width;
     this.anchor = anchor;
     this.held = held;
@@ -61,21 +63,6 @@ export class Block {
     return new Block(to, parts[0].dx + parts[0].block.anchor, [], parts);
   }
 
-  /** Blocks side by side, left to right, anchored on the first. */
-  static laySideBySide(blocks: Block[], gap: number): Block {
-    if (blocks.length === 0) return Block.empty();
-
-    let cursor = 0;
-    const nested = blocks.map((block) => {
-      const placed = { block, dx: cursor };
-      cursor += block.width + gap;
-
-      return placed;
-    });
-
-    return new Block(cursor - gap, nested[0].dx + blocks[0].anchor, [], nested);
-  }
-
   /**
    * One block above another, each keeping the horizontal position it was given.
    * Callers line them up by choosing those positions, not by any rule here.
@@ -103,15 +90,17 @@ export class Block {
     for (const { block, dx } of this.nested) block.commit(x + dx);
   }
 
-  /** Where a card sits, measured from this block's left edge. */
-  offsetOf(card: Card): number | null {
-    for (const held of this.held) if (held.card === card) return held.dx;
-
-    for (const { block, dx } of this.nested) {
-      const inner = block.offsetOf(card);
-      if (inner !== null) return dx + inner;
-    }
-
-    return null;
+  /**
+   * Every card in the block and where it would land, without landing it. This
+   * is what lets a caller work out where the block fits before choosing a
+   * position for it.
+   */
+  listOffsets(): Placement[] {
+    return [
+      ...this.held,
+      ...this.nested.flatMap(({ block, dx }) =>
+        block.listOffsets().map((held) => ({ card: held.card, dx: dx + held.dx })),
+      ),
+    ];
   }
 }
