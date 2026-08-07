@@ -6,6 +6,7 @@ were written while fixing the thing they break.
 
 | File | What it is for |
 | --- | --- |
+| `simpsons.json` | The one the page opens with, and the one the exercise names. A half sibling, an unmarried couple, a single parent, and two pairs sharing a birth year. |
 | `one-person.json` | A family of one. The degenerate case: no unions, no lines, nothing to centre. |
 | `remarriage.json` | Henry Tudor and three wives, a child by each. Nobody can stand beside three people, so the third marriage runs *below* the row rather than through the second wife's card. |
 | `cousins-marry.json` | First cousins marry. Their descent lines rejoin, so the graph is not a tree; the parents still line up and nothing loops. |

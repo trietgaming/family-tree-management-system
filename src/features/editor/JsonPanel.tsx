@@ -1,5 +1,6 @@
 import { JsonEditor } from "../../components/JsonEditor";
 import type { Problem } from "../../family/validate";
+import { PanelActions } from "./PanelActions";
 
 type JsonPanelProps = {
   value: string;
@@ -22,9 +23,11 @@ export function JsonPanel({ value, problems, summary, onChange }: JsonPanelProps
       <div>
         <h1 className="text-sm font-semibold text-slate-900">Family JSON</h1>
         <p className="mt-0.5 text-xs text-slate-500">
-          Paste a family here. The diagram follows as you type.
+          Paste a family here. Edits are kept for next time.
         </p>
       </div>
+
+      <PanelActions value={value} onLoad={onChange} />
 
       <JsonEditor value={value} problems={problems} onChange={onChange} />
 
