@@ -4,12 +4,19 @@ import type { Problem } from "../../family/validate";
 type JsonPanelProps = {
   value: string;
   problems: Problem[];
-  /** Shown when there is nothing wrong. */
+  /** Shown when nothing is wrong at all. */
   summary: string;
   onChange: (value: string) => void;
 };
 
+const TONE = {
+  error: "text-red-700",
+  warning: "text-amber-700",
+};
+
 export function JsonPanel({ value, problems, summary, onChange }: JsonPanelProps) {
+  const errors = problems.filter((each) => each.severity === "error").length;
+
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 border-r border-slate-200 bg-white p-4">
       <div>
@@ -27,14 +34,16 @@ export function JsonPanel({ value, problems, summary, onChange }: JsonPanelProps
         </p>
       ) : (
         <ul
-          role="alert"
-          className="max-h-48 space-y-1.5 overflow-y-auto rounded-md bg-red-50 p-3 text-xs text-red-700"
+          role={errors > 0 ? "alert" : "status"}
+          className={`max-h-48 space-y-1.5 overflow-y-auto rounded-md p-3 text-xs ${
+            errors > 0 ? "bg-red-50" : "bg-amber-50"
+          }`}
         >
-          {problems.map((problem, index) => (
-            <li key={`${problem.path}-${index}`}>
-              {problem.path && <code className="font-mono font-medium">{problem.path}</code>}
-              {problem.path && " — "}
-              {problem.message}
+          {problems.map((each, index) => (
+            <li key={`${each.path}-${index}`} className={TONE[each.severity]}>
+              {each.path && <code className="font-mono font-medium">{each.path}</code>}
+              {each.path && " — "}
+              {each.message}
             </li>
           ))}
         </ul>

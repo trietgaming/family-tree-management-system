@@ -1,0 +1,67 @@
+{
+  "people": [
+    {
+      "id": "dad",
+      "name": "Dad",
+      "gender": "male",
+      "birthYear": 1980,
+      "spouseIds": [
+        "mum"
+      ]
+    },
+    {
+      "id": "mum",
+      "name": "Mum",
+      "gender": "female",
+      "birthYear": 1982
+    },
+    {
+      "id": "swapped",
+      "name": "Swapped roles",
+      "gender": "female",
+      "birthYear": 2005,
+      "fatherId": "mum",
+      "motherId": "dad"
+    },
+    {
+      "id": "tooearly",
+      "name": "Older than dad",
+      "gender": "male",
+      "birthYear": 1975,
+      "fatherId": "dad",
+      "motherId": "mum"
+    },
+    {
+      "id": "tooyoung",
+      "name": "Dad was nine",
+      "gender": "female",
+      "birthYear": 1989,
+      "fatherId": "dad",
+      "motherId": "mum"
+    },
+    {
+      "id": "unborn",
+      "name": "Not born yet",
+      "gender": "male",
+      "birthYear": 3000,
+      "fatherId": "dad",
+      "motherId": "mum"
+    },
+    {
+      "id": "ghosted",
+      "name": "Child of nobody",
+      "gender": "female",
+      "birthYear": 2010,
+      "fatherId": "missing.person"
+    },
+    {
+      "id": "notasibling",
+      "name": "Not a sibling",
+      "gender": "male",
+      "birthYear": 2012,
+      "siblingIds": [
+        "swapped"
+      ]
+    }
+  ]
+}

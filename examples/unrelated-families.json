@@ -1,0 +1,49 @@
+{
+  "people": [
+    {
+      "id": "nguyen.van.an",
+      "name": "Nguyễn Văn An",
+      "gender": "male",
+      "birthYear": 1940,
+      "spouseIds": [
+        "tran.thi.bich"
+      ]
+    },
+    {
+      "id": "tran.thi.bich",
+      "name": "Trần Thị Bích",
+      "gender": "female",
+      "birthYear": 1944,
+      "spouseIds": [
+        "nguyen.van.an"
+      ]
+    },
+    {
+      "id": "nguyen.minh.duc",
+      "name": "Nguyễn Minh Đức",
+      "gender": "male",
+      "birthYear": 1968,
+      "fatherId": "nguyen.van.an",
+      "motherId": "tran.thi.bich"
+    },
+    {
+      "id": "solo",
+      "name": "Someone With A Rather Long Name Indeed",
+      "gender": "other",
+      "birthYear": 1975
+    },
+    {
+      "id": "mother.only",
+      "name": "A mother",
+      "gender": "female",
+      "birthYear": 1960
+    },
+    {
+      "id": "her.child",
+      "name": "Her child",
+      "gender": "male",
+      "birthYear": 1988,
+      "motherId": "mother.only"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "people": [
+    {
+      "id": "henry",
+      "name": "Henry Tudor",
+      "gender": "male",
+      "birthYear": 1491,
+      "spouseIds": [
+        "katherine",
+        "anne",
+        "jane"
+      ]
+    },
+    {
+      "id": "katherine",
+      "name": "Katherine of Aragon",
+      "gender": "female",
+      "birthYear": 1485,
+      "spouseIds": [
+        "henry"
+      ]
+    },
+    {
+      "id": "anne",
+      "name": "Anne Boleyn",
+      "gender": "female",
+      "birthYear": 1501,
+      "spouseIds": [
+        "henry"
+      ]
+    },
+    {
+      "id": "jane",
+      "name": "Jane Seymour",
+      "gender": "female",
+      "birthYear": 1508,
+      "spouseIds": [
+        "henry"
+      ]
+    },
+    {
+      "id": "mary",
+      "name": "Mary",
+      "gender": "female",
+      "birthYear": 1516,
+      "fatherId": "henry",
+      "motherId": "katherine"
+    },
+    {
+      "id": "elizabeth",
+      "name": "Elizabeth",
+      "gender": "female",
+      "birthYear": 1533,
+      "fatherId": "henry",
+      "motherId": "anne"
+    },
+    {
+      "id": "edward",
+      "name": "Edward",
+      "gender": "male",
+      "birthYear": 1537,
+      "fatherId": "henry",
+      "motherId": "jane"
+    }
+  ]
+}

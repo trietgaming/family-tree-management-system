@@ -1,0 +1,134 @@
+{
+  "people": [
+    {
+      "id": "pa",
+      "name": "Patriarch",
+      "gender": "male",
+      "birthYear": 1890,
+      "spouseIds": [
+        "ma"
+      ]
+    },
+    {
+      "id": "ma",
+      "name": "Matriarch",
+      "gender": "female",
+      "birthYear": 1893,
+      "spouseIds": [
+        "pa"
+      ]
+    },
+    {
+      "id": "c0",
+      "name": "Child 1",
+      "gender": "male",
+      "birthYear": 1915,
+      "fatherId": "pa",
+      "motherId": "ma"
+    },
+    {
+      "id": "c1",
+      "name": "Child 2",
+      "gender": "female",
+      "birthYear": 1916,
+      "fatherId": "pa",
+      "motherId": "ma"
+    },
+    {
+      "id": "c2",
+      "name": "Child 3",
+      "gender": "male",
+      "birthYear": 1917,
+      "fatherId": "pa",
+      "motherId": "ma"
+    },
+    {
+      "id": "c3",
+      "name": "Child 4",
+      "gender": "female",
+      "birthYear": 1918,
+      "fatherId": "pa",
+      "motherId": "ma"
+    },
+    {
+      "id": "c4",
+      "name": "Child 5",
+      "gender": "male",
+      "birthYear": 1919,
+      "fatherId": "pa",
+      "motherId": "ma"
+    },
+    {
+      "id": "c5",
+      "name": "Child 6",
+      "gender": "female",
+      "birthYear": 1920,
+      "fatherId": "pa",
+      "motherId": "ma"
+    },
+    {
+      "id": "c6",
+      "name": "Child 7",
+      "gender": "male",
+      "birthYear": 1921,
+      "fatherId": "pa",
+      "motherId": "ma"
+    },
+    {
+      "id": "c7",
+      "name": "Child 8",
+      "gender": "female",
+      "birthYear": 1922,
+      "fatherId": "pa",
+      "motherId": "ma"
+    },
+    {
+      "id": "c8",
+      "name": "Child 9",
+      "gender": "male",
+      "birthYear": 1923,
+      "fatherId": "pa",
+      "motherId": "ma"
+    },
+    {
+      "id": "c9",
+      "name": "Child 10",
+      "gender": "female",
+      "birthYear": 1924,
+      "fatherId": "pa",
+      "motherId": "ma"
+    },
+    {
+      "id": "c10",
+      "name": "Child 11",
+      "gender": "male",
+      "birthYear": 1925,
+      "fatherId": "pa",
+      "motherId": "ma"
+    },
+    {
+      "id": "c11",
+      "name": "Child 12",
+      "gender": "female",
+      "birthYear": 1926,
+      "fatherId": "pa",
+      "motherId": "ma"
+    },
+    {
+      "id": "c12",
+      "name": "Child 13",
+      "gender": "male",
+      "birthYear": 1927,
+      "fatherId": "pa",
+      "motherId": "ma"
+    },
+    {
+      "id": "c13",
+      "name": "Child 14",
+      "gender": "female",
+      "birthYear": 1928,
+      "fatherId": "pa",
+      "motherId": "ma"
+    }
+  ]
+}

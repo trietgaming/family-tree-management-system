@@ -43,7 +43,7 @@ function toDiagnostics(state: EditorState, problems: Problem[]): Diagnostic[] {
       // is pinned to the start rather than dropped.
       from: range?.from ?? 0,
       to: range?.to ?? 0,
-      severity: "error",
+      severity: each.severity,
       message: each.message,
     };
   });

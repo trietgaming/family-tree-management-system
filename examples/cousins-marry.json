@@ -1,0 +1,92 @@
+{
+  "people": [
+    {
+      "id": "g1",
+      "name": "Grandfather",
+      "gender": "male",
+      "birthYear": 1900,
+      "spouseIds": [
+        "g2"
+      ]
+    },
+    {
+      "id": "g2",
+      "name": "Grandmother",
+      "gender": "female",
+      "birthYear": 1902,
+      "spouseIds": [
+        "g1"
+      ]
+    },
+    {
+      "id": "a",
+      "name": "Aunt",
+      "gender": "female",
+      "birthYear": 1925,
+      "fatherId": "g1",
+      "motherId": "g2",
+      "spouseIds": [
+        "ah"
+      ]
+    },
+    {
+      "id": "ah",
+      "name": "Her husband",
+      "gender": "male",
+      "birthYear": 1923,
+      "spouseIds": [
+        "a"
+      ]
+    },
+    {
+      "id": "u",
+      "name": "Uncle",
+      "gender": "male",
+      "birthYear": 1928,
+      "fatherId": "g1",
+      "motherId": "g2",
+      "spouseIds": [
+        "uw"
+      ]
+    },
+    {
+      "id": "uw",
+      "name": "His wife",
+      "gender": "female",
+      "birthYear": 1930,
+      "spouseIds": [
+        "u"
+      ]
+    },
+    {
+      "id": "c1",
+      "name": "Cousin one",
+      "gender": "male",
+      "birthYear": 1950,
+      "fatherId": "ah",
+      "motherId": "a",
+      "spouseIds": [
+        "c2"
+      ]
+    },
+    {
+      "id": "c2",
+      "name": "Cousin two",
+      "gender": "female",
+      "birthYear": 1953,
+      "fatherId": "u",
+      "motherId": "uw",
+      "spouseIds": [
+        "c1"
+      ]
+    },
+    {
+      "id": "k",
+      "name": "Their child",
+      "gender": "female",
+      "birthYear": 1978,
+      "fatherId": "c1",
+      "motherId": "c2"
+    }
+  ]
+}

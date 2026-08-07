@@ -2,7 +2,7 @@ import { familySchema, type Family } from "./schema";
 import { findProblems, problem, type Problem } from "./validate";
 
 export type ParseResult =
-  | { ok: true; family: Family }
+  | { ok: true; family: Family; problems: Problem[] }
   | { ok: false; problems: Problem[] };
 
 /**
@@ -31,5 +31,8 @@ export function parseFamily(text: string): ParseResult {
 
   const problems = findProblems(result.data);
 
-  return problems.length === 0 ? { ok: true, family: result.data } : { ok: false, problems };
+  // Warnings travel with a family that is still worth drawing.
+  return problems.some((each) => each.severity === "error")
+    ? { ok: false, problems }
+    : { ok: true, family: result.data, problems };
 }

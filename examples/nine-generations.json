@@ -1,0 +1,182 @@
+{
+  "people": [
+    {
+      "id": "h0",
+      "name": "Heir 1",
+      "gender": "male",
+      "birthYear": 1700,
+      "spouseIds": [
+        "w0"
+      ]
+    },
+    {
+      "id": "w0",
+      "name": "Consort 1",
+      "gender": "female",
+      "birthYear": 1702,
+      "spouseIds": [
+        "h0"
+      ]
+    },
+    {
+      "id": "h1",
+      "name": "Heir 2",
+      "gender": "male",
+      "birthYear": 1728,
+      "spouseIds": [
+        "w1"
+      ],
+      "fatherId": "h0",
+      "motherId": "w0"
+    },
+    {
+      "id": "w1",
+      "name": "Consort 2",
+      "gender": "female",
+      "birthYear": 1730,
+      "spouseIds": [
+        "h1"
+      ]
+    },
+    {
+      "id": "h2",
+      "name": "Heir 3",
+      "gender": "male",
+      "birthYear": 1756,
+      "spouseIds": [
+        "w2"
+      ],
+      "fatherId": "h1",
+      "motherId": "w1"
+    },
+    {
+      "id": "w2",
+      "name": "Consort 3",
+      "gender": "female",
+      "birthYear": 1758,
+      "spouseIds": [
+        "h2"
+      ]
+    },
+    {
+      "id": "h3",
+      "name": "Heir 4",
+      "gender": "male",
+      "birthYear": 1784,
+      "spouseIds": [
+        "w3"
+      ],
+      "fatherId": "h2",
+      "motherId": "w2"
+    },
+    {
+      "id": "w3",
+      "name": "Consort 4",
+      "gender": "female",
+      "birthYear": 1786,
+      "spouseIds": [
+        "h3"
+      ]
+    },
+    {
+      "id": "h4",
+      "name": "Heir 5",
+      "gender": "male",
+      "birthYear": 1812,
+      "spouseIds": [
+        "w4"
+      ],
+      "fatherId": "h3",
+      "motherId": "w3"
+    },
+    {
+      "id": "w4",
+      "name": "Consort 5",
+      "gender": "female",
+      "birthYear": 1814,
+      "spouseIds": [
+        "h4"
+      ]
+    },
+    {
+      "id": "h5",
+      "name": "Heir 6",
+      "gender": "male",
+      "birthYear": 1840,
+      "spouseIds": [
+        "w5"
+      ],
+      "fatherId": "h4",
+      "motherId": "w4"
+    },
+    {
+      "id": "w5",
+      "name": "Consort 6",
+      "gender": "female",
+      "birthYear": 1842,
+      "spouseIds": [
+        "h5"
+      ]
+    },
+    {
+      "id": "h6",
+      "name": "Heir 7",
+      "gender": "male",
+      "birthYear": 1868,
+      "spouseIds": [
+        "w6"
+      ],
+      "fatherId": "h5",
+      "motherId": "w5"
+    },
+    {
+      "id": "w6",
+      "name": "Consort 7",
+      "gender": "female",
+      "birthYear": 1870,
+      "spouseIds": [
+        "h6"
+      ]
+    },
+    {
+      "id": "h7",
+      "name": "Heir 8",
+      "gender": "male",
+      "birthYear": 1896,
+      "spouseIds": [
+        "w7"
+      ],
+      "fatherId": "h6",
+      "motherId": "w6"
+    },
+    {
+      "id": "w7",
+      "name": "Consort 8",
+      "gender": "female",
+      "birthYear": 1898,
+      "spouseIds": [
+        "h7"
+      ]
+    },
+    {
+      "id": "h8",
+      "name": "Heir 9",
+      "gender": "male",
+      "birthYear": 1924,
+      "spouseIds": [
+        "w8"
+      ],
+      "fatherId": "h7",
+      "motherId": "w7"
+    },
+    {
+      "id": "w8",
+      "name": "Consort 9",
+      "gender": "female",
+      "birthYear": 1926,
+      "spouseIds": [
+        "h8"
+      ]
+    }
+  ]
+}

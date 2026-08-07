@@ -6,10 +6,23 @@ export type Problem = {
   /** The same location, kept in parts so the editor can find it in the text. */
   segments: readonly PropertyKey[];
   message: string;
+  /**
+   * An error leaves the document meaning something the drawing cannot show —
+   * a reference to nobody, a person born of themselves. A warning is data that
+   * holds together well enough to draw but says something unlikely, and the
+   * reader is better served by seeing the tree along with the doubt.
+   */
+  severity: "error" | "warning";
 };
 
 const PARENT_FIELDS = ["fatherId", "motherId"] as const;
 const LINK_FIELDS = ["spouseIds", "siblingIds"] as const;
+
+const PARENT_ROLE = { fatherId: "male", motherId: "female" } as const;
+const PARENT_LABEL = { fatherId: "father", motherId: "mother" } as const;
+
+/** Below this, a parent is young enough that the years are more likely a typo. */
+const YOUNGEST_PARENT = 12;
 
 export function formatPath(segments: readonly PropertyKey[]): string {
   return segments.reduce<string>((path, segment) => {
@@ -20,7 +33,11 @@ export function formatPath(segments: readonly PropertyKey[]): string {
 }
 
 export function problem(segments: readonly PropertyKey[], message: string): Problem {
-  return { path: formatPath(segments), segments, message };
+  return { path: formatPath(segments), segments, message, severity: "error" };
+}
+
+export function warning(segments: readonly PropertyKey[], message: string): Problem {
+  return { path: formatPath(segments), segments, message, severity: "warning" };
 }
 
 /**
@@ -36,7 +53,104 @@ export function findProblems(family: Family): Problem[] {
     ...brokenReferences(people, byId),
     ...ancestryLoops(byId),
     ...contradictorySiblings(people, byId),
+    ...parentsAtOdds(people, byId),
+    ...unlikelyYears(people, byId),
+    ...oneSidedMarriages(people, byId),
   ];
+}
+
+/** What the roles say about a parent, against what the parent's record says. */
+function parentsAtOdds(people: Person[], byId: Map<string, Person>): Problem[] {
+  const problems: Problem[] = [];
+
+  people.forEach((person, index) => {
+    if (person.fatherId && person.fatherId === person.motherId) {
+      problems.push(
+        problem(
+          ["people", index, "motherId"],
+          `${person.name} has the same person down as both parents`,
+        ),
+      );
+    }
+
+    for (const field of PARENT_FIELDS) {
+      const parent = person[field] ? byId.get(person[field]) : undefined;
+      const expected: string = PARENT_ROLE[field];
+
+      // An unrecorded gender contradicts nothing, and "other" is not the
+      // opposite of anything — only a stated opposite is worth reporting.
+      if (!parent?.gender || parent.gender === expected || parent.gender === "other") continue;
+
+      problems.push(
+        warning(
+          ["people", index, field],
+          `${parent.name} is down as the ${PARENT_LABEL[field]} of ${person.name}, but recorded as ${parent.gender}`,
+        ),
+      );
+    }
+  });
+
+  return problems;
+}
+
+function unlikelyYears(people: Person[], byId: Map<string, Person>): Problem[] {
+  const problems: Problem[] = [];
+  const thisYear = new Date().getFullYear();
+
+  people.forEach((person, index) => {
+    if (person.birthYear !== undefined && person.birthYear > thisYear) {
+      problems.push(
+        warning(["people", index, "birthYear"], `${person.name} is not born yet`),
+      );
+    }
+
+    if (person.birthYear === undefined) return;
+
+    for (const field of PARENT_FIELDS) {
+      const parent = person[field] ? byId.get(person[field]) : undefined;
+      if (parent?.birthYear === undefined) continue;
+
+      const gap = person.birthYear - parent.birthYear;
+      if (gap >= YOUNGEST_PARENT) continue;
+
+      problems.push(
+        warning(
+          ["people", index, field],
+          gap <= 0
+            ? `${parent.name} was born in ${parent.birthYear}, not before ${person.name} in ${person.birthYear}`
+            : `${parent.name} was only ${gap} when ${person.name} was born`,
+        ),
+      );
+    }
+  });
+
+  return problems;
+}
+
+/**
+ * One person naming the other as a spouse is enough to draw the pair, but the
+ * line is only drawn as a marriage when both say so — so a listing that goes
+ * one way quietly turns into something weaker than intended.
+ */
+function oneSidedMarriages(people: Person[], byId: Map<string, Person>): Problem[] {
+  const problems: Problem[] = [];
+
+  people.forEach((person, index) => {
+    person.spouseIds?.forEach((spouseId, position) => {
+      const spouse = byId.get(spouseId);
+      if (!spouse || spouse.id === person.id) return;
+      if ((spouse.spouseIds ?? []).includes(person.id)) return;
+
+      problems.push(
+        warning(
+          ["people", index, "spouseIds", position],
+          `${person.name} names ${spouse.name} as a spouse, but not the other way round`,
+        ),
+      );
+    });
+  });
+
+  return problems;
 }
 
 /** First occurrence wins, so every other check sees one person per id. */
@@ -84,15 +198,23 @@ function brokenReferences(people: Person[], byId: Map<string, Person>): Problem[
           problem(["people", index, field], `${person.name} cannot be their own parent`),
         );
       } else if (!byId.has(target)) {
-        problems.push(problem(["people", index, field], unknownId(target)));
+        problems.push(warning(["people", index, field], unknownId(target)));
       }
     }
+
+    person.spouseIds?.forEach((target, position) => {
+      if (target !== person.id) return;
+
+      problems.push(
+        problem(["people", index, "spouseIds", position], `${person.name} cannot marry themselves`),
+      );
+    });
 
     for (const field of LINK_FIELDS) {
       person[field]?.forEach((target, position) => {
         if (byId.has(target)) return;
 
-        problems.push(problem(["people", index, field, position], unknownId(target)));
+        problems.push(warning(["people", index, field, position], unknownId(target)));
       });
     }
   });
@@ -170,7 +292,7 @@ function contradictorySiblings(people: Person[], byId: Map<string, Person>): Pro
       const at = ["people", index, "siblingIds", position];
 
       if (siblingId === person.id) {
-        problems.push(problem(at, `${person.name} is listed as their own sibling`));
+        problems.push(warning(at, `${person.name} is listed as their own sibling`));
         return;
       }
 
@@ -180,7 +302,7 @@ function contradictorySiblings(people: Person[], byId: Map<string, Person>): Pro
 
       if (!parentsOf(sibling).some((id) => parents.has(id))) {
         problems.push(
-          problem(at, `${person.name} and ${sibling.name} are listed as siblings but share no parent`),
+          warning(at, `${person.name} and ${sibling.name} are listed as siblings but share no parent`),
         );
       }
     });

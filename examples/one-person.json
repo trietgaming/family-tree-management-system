@@ -1,0 +1,10 @@
+{
+  "people": [
+    {
+      "id": "ada",
+      "name": "Ada Lovelace",
+      "gender": "female",
+      "birthYear": 1815
+    }
+  ]
+}

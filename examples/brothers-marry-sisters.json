@@ -1,0 +1,100 @@
+{
+  "people": [
+    {
+      "id": "p1",
+      "name": "Father Alpha",
+      "gender": "male",
+      "birthYear": 1920,
+      "spouseIds": [
+        "p2"
+      ]
+    },
+    {
+      "id": "p2",
+      "name": "Mother Alpha",
+      "gender": "female",
+      "birthYear": 1922,
+      "spouseIds": [
+        "p1"
+      ]
+    },
+    {
+      "id": "q1",
+      "name": "Father Beta",
+      "gender": "male",
+      "birthYear": 1918,
+      "spouseIds": [
+        "q2"
+      ]
+    },
+    {
+      "id": "q2",
+      "name": "Mother Beta",
+      "gender": "female",
+      "birthYear": 1921,
+      "spouseIds": [
+        "q1"
+      ]
+    },
+    {
+      "id": "b1",
+      "name": "Elder brother",
+      "gender": "male",
+      "birthYear": 1945,
+      "fatherId": "p1",
+      "motherId": "p2",
+      "spouseIds": [
+        "s1"
+      ]
+    },
+    {
+      "id": "b2",
+      "name": "Younger brother",
+      "gender": "male",
+      "birthYear": 1948,
+      "fatherId": "p1",
+      "motherId": "p2",
+      "spouseIds": [
+        "s2"
+      ]
+    },
+    {
+      "id": "s1",
+      "name": "Elder sister",
+      "gender": "female",
+      "birthYear": 1946,
+      "fatherId": "q1",
+      "motherId": "q2",
+      "spouseIds": [
+        "b1"
+      ]
+    },
+    {
+      "id": "s2",
+      "name": "Younger sister",
+      "gender": "female",
+      "birthYear": 1949,
+      "fatherId": "q1",
+      "motherId": "q2",
+      "spouseIds": [
+        "b2"
+      ]
+    },
+    {
+      "id": "n1",
+      "name": "First nephew",
+      "gender": "male",
+      "birthYear": 1970,
+      "fatherId": "b1",
+      "motherId": "s1"
+    },
+    {
+      "id": "n2",
+      "name": "Second nephew",
+      "gender": "male",
+      "birthYear": 1974,
+      "fatherId": "b2",
+      "motherId": "s2"
+    }
+  ]
+}
