@@ -1,38 +1,24 @@
-import {
-  Background,
-  Controls,
-  MiniMap,
-  ReactFlow,
-  useEdgesState,
-  useNodesState,
-  type Edge,
-  type Node,
-} from "@xyflow/react";
-
-// Placeholders. Step 3 replaces these with positions the layout computes from
-// the family model.
-const initialNodes: Node[] = [
-  { id: "homer", position: { x: 0, y: 0 }, data: { label: "Homer" } },
-  { id: "bart", position: { x: 0, y: 140 }, data: { label: "Bart" } },
-];
-
-const initialEdges: Edge[] = [{ id: "homer-bart", source: "homer", target: "bart" }];
+import { Background, Controls, MiniMap, ReactFlow } from "@xyflow/react";
+import { useMemo, useState } from "react";
+import { parseFamily } from "./family/parse";
+import simpsons from "./family/simpsons.json?raw";
+import { JsonPanel } from "./features/editor/JsonPanel";
 
 export default function App() {
-  // React Flow reports the size it measured for each node through onNodesChange.
-  // Without somewhere to put that, it cannot place an edge or fit the view.
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
+  const [text, setText] = useState(simpsons);
+  const result = useMemo(() => parseFamily(text), [text]);
 
   return (
-    <div className="h-screen w-screen bg-slate-50">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        fitView
-      >
+    <div className="grid h-screen w-screen grid-cols-[minmax(22rem,28rem)_1fr] bg-slate-50">
+      <JsonPanel
+        value={text}
+        problems={result.ok ? [] : result.problems}
+        summary={result.ok ? `${result.family.people.length} people` : ""}
+        onChange={setText}
+      />
+
+      {/* Step 3 computes positions from the parsed family; step 4 draws them. */}
+      <ReactFlow nodes={[]} edges={[]} fitView>
         <Background />
         <Controls />
         <MiniMap />

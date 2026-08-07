@@ -1,0 +1,123 @@
+{
+  "people": [
+    {
+      "id": "abe",
+      "name": "Abraham Simpson",
+      "gender": "male",
+      "birthYear": 1927,
+      "spouseIds": [
+        "mona"
+      ]
+    },
+    {
+      "id": "mona",
+      "name": "Mona Simpson",
+      "gender": "female",
+      "birthYear": 1929,
+      "spouseIds": [
+        "abe"
+      ]
+    },
+    {
+      "id": "edwina",
+      "name": "Edwina",
+      "gender": "female",
+      "birthYear": 1930
+    },
+    {
+      "id": "clancy",
+      "name": "Clancy Bouvier",
+      "gender": "male",
+      "birthYear": 1925,
+      "spouseIds": [
+        "jacqueline"
+      ]
+    },
+    {
+      "id": "jacqueline",
+      "name": "Jacqueline Bouvier",
+      "gender": "female",
+      "birthYear": 1928,
+      "spouseIds": [
+        "clancy"
+      ]
+    },
+    {
+      "id": "herb",
+      "name": "Herbert Powell",
+      "gender": "male",
+      "birthYear": 1949,
+      "fatherId": "abe",
+      "motherId": "edwina"
+    },
+    {
+      "id": "homer",
+      "name": "Homer Simpson",
+      "gender": "male",
+      "birthYear": 1956,
+      "fatherId": "abe",
+      "motherId": "mona",
+      "spouseIds": [
+        "marge"
+      ]
+    },
+    {
+      "id": "patty",
+      "name": "Patty Bouvier",
+      "gender": "female",
+      "birthYear": 1954,
+      "fatherId": "clancy",
+      "motherId": "jacqueline"
+    },
+    {
+      "id": "selma",
+      "name": "Selma Bouvier",
+      "gender": "female",
+      "birthYear": 1954,
+      "fatherId": "clancy",
+      "motherId": "jacqueline"
+    },
+    {
+      "id": "marge",
+      "name": "Marge Simpson",
+      "gender": "female",
+      "birthYear": 1956,
+      "fatherId": "clancy",
+      "motherId": "jacqueline",
+      "spouseIds": [
+        "homer"
+      ]
+    },
+    {
+      "id": "bart",
+      "name": "Bart Simpson",
+      "gender": "male",
+      "birthYear": 1980,
+      "fatherId": "homer",
+      "motherId": "marge"
+    },
+    {
+      "id": "lisa",
+      "name": "Lisa Simpson",
+      "gender": "female",
+      "birthYear": 1982,
+      "fatherId": "homer",
+      "motherId": "marge"
+    },
+    {
+      "id": "maggie",
+      "name": "Maggie Simpson",
+      "gender": "female",
+      "birthYear": 1988,
+      "fatherId": "homer",
+      "motherId": "marge"
+    },
+    {
+      "id": "ling",
+      "name": "Ling Bouvier",
+      "gender": "female",
+      "birthYear": 1998,
+      "motherId": "selma"
+    }
+  ]
+}
