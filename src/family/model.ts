@@ -25,7 +25,7 @@ export type FamilyModel = {
 };
 
 /** Prefixed because unions and people end up as node ids in the same diagram. */
-function unionIdFor(partnerIds: readonly string[]): string {
+function unionIdOf(partnerIds: readonly string[]): string {
   return `union:${[...partnerIds].sort().join("+")}`;
 }
 
@@ -34,7 +34,7 @@ export function buildModel(family: Family): FamilyModel {
   const unions = new Map<string, Union>();
 
   const ensure = (partnerIds: string[]): Union => {
-    const id = unionIdFor(partnerIds);
+    const id = unionIdOf(partnerIds);
     const existing = unions.get(id);
     if (existing) return existing;
 
@@ -101,4 +101,23 @@ export function ancestorsOf(model: FamilyModel, personId: string): Set<string> {
 
 export function arePartners(model: FamilyModel, a: string, b: string): boolean {
   return (model.unionsOf.get(a) ?? []).some((union) => union.partnerIds.includes(b));
+}
+
+/**
+ * Both named each other, rather than merely sharing a child. The weaker sort
+ * is drawn dashed, and is the one given up first when two pairings cannot both
+ * hold — saying "they had a child" claims less than saying "they married".
+ */
+export function isDeclaredPair(a: Person | undefined, b: Person | undefined): boolean {
+  if (!a || !b) return false;
+
+  return (a.spouseIds ?? []).includes(b.id) && (b.spouseIds ?? []).includes(a.id);
+}
+
+export function isDeclaredUnion(model: FamilyModel, union: Union): boolean {
+  if (union.partnerIds.length !== 2) return false;
+
+  const [a, b] = union.partnerIds;
+
+  return isDeclaredPair(model.byId.get(a), model.byId.get(b));
 }

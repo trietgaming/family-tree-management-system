@@ -1,0 +1,584 @@
+{
+  "people": [
+    {
+      "id": "aldric",
+      "name": "Aldric Vaneck",
+      "gender": "male",
+      "birthYear": 1820,
+      "spouseIds": [
+        "beatrix"
+      ]
+    },
+    {
+      "id": "beatrix",
+      "name": "Beatrix Vaneck",
+      "gender": "female",
+      "birthYear": 1822,
+      "spouseIds": [
+        "aldric"
+      ]
+    },
+    {
+      "id": "cordelia",
+      "name": "Cordelia Roth",
+      "gender": "female",
+      "birthYear": 1825
+    },
+    {
+      "id": "dietrich",
+      "name": "Dietrich Mauer",
+      "gender": "male",
+      "birthYear": 1818,
+      "spouseIds": [
+        "elspeth"
+      ]
+    },
+    {
+      "id": "elspeth",
+      "name": "Elspeth Mauer",
+      "gender": "female",
+      "birthYear": 1824,
+      "spouseIds": [
+        "dietrich"
+      ]
+    },
+    {
+      "id": "frederick",
+      "name": "Frederick Vaneck",
+      "gender": "male",
+      "birthYear": 1845,
+      "fatherId": "aldric",
+      "motherId": "beatrix",
+      "spouseIds": [
+        "petra"
+      ]
+    },
+    {
+      "id": "gisela",
+      "name": "Gisela Vaneck",
+      "gender": "female",
+      "birthYear": 1847,
+      "fatherId": "aldric",
+      "motherId": "beatrix",
+      "spouseIds": [
+        "otto"
+      ]
+    },
+    {
+      "id": "hugo",
+      "name": "Hugo Vaneck",
+      "gender": "male",
+      "birthYear": 1849,
+      "fatherId": "aldric",
+      "motherId": "beatrix",
+      "spouseIds": [
+        "mathilde"
+      ]
+    },
+    {
+      "id": "ingrid",
+      "name": "Ingrid Vaneck",
+      "gender": "female",
+      "birthYear": 1851,
+      "fatherId": "aldric",
+      "motherId": "beatrix",
+      "spouseIds": [
+        "nikolaus",
+        "xaver"
+      ]
+    },
+    {
+      "id": "johann",
+      "name": "Johann Vaneck",
+      "gender": "male",
+      "birthYear": 1853,
+      "fatherId": "aldric",
+      "motherId": "beatrix",
+      "spouseIds": [
+        "klara"
+      ]
+    },
+    {
+      "id": "klara",
+      "name": "Klara Vaneck",
+      "gender": "female",
+      "birthYear": 1855,
+      "fatherId": "aldric",
+      "motherId": "beatrix",
+      "spouseIds": [
+        "johann"
+      ]
+    },
+    {
+      "id": "lorenz",
+      "name": "Lorenz Vaneck",
+      "gender": "male",
+      "birthYear": 1857,
+      "fatherId": "aldric",
+      "motherId": "beatrix"
+    },
+    {
+      "id": "mathilde",
+      "name": "Mathilde Roth",
+      "gender": "female",
+      "birthYear": 1848,
+      "motherId": "cordelia",
+      "spouseIds": [
+        "hugo"
+      ]
+    },
+    {
+      "id": "nikolaus",
+      "name": "Nikolaus Roth",
+      "gender": "male",
+      "birthYear": 1850,
+      "motherId": "cordelia",
+      "spouseIds": [
+        "ingrid"
+      ]
+    },
+    {
+      "id": "otto",
+      "name": "Otto Mauer",
+      "gender": "male",
+      "birthYear": 1846,
+      "fatherId": "dietrich",
+      "motherId": "elspeth",
+      "spouseIds": [
+        "gisela"
+      ]
+    },
+    {
+      "id": "petra",
+      "name": "Petra Mauer",
+      "gender": "female",
+      "birthYear": 1850,
+      "fatherId": "dietrich",
+      "motherId": "elspeth",
+      "spouseIds": [
+        "frederick"
+      ]
+    },
+    {
+      "id": "quentin",
+      "name": "Quentin Mauer",
+      "gender": "male",
+      "birthYear": 1852,
+      "fatherId": "dietrich",
+      "motherId": "elspeth",
+      "spouseIds": [
+        "helena"
+      ]
+    },
+    {
+      "id": "rudolf",
+      "name": "Rudolf Vaneck",
+      "gender": "male",
+      "birthYear": 1872,
+      "fatherId": "frederick",
+      "motherId": "petra",
+      "spouseIds": [
+        "viktoria"
+      ]
+    },
+    {
+      "id": "theresa",
+      "name": "Theresa Vaneck",
+      "gender": "female",
+      "birthYear": 1875,
+      "fatherId": "frederick",
+      "motherId": "petra",
+      "spouseIds": [
+        "ulrich"
+      ]
+    },
+    {
+      "id": "ulrich",
+      "name": "Ulrich Mauer",
+      "gender": "male",
+      "birthYear": 1871,
+      "fatherId": "otto",
+      "motherId": "gisela",
+      "spouseIds": [
+        "theresa"
+      ]
+    },
+    {
+      "id": "viktoria",
+      "name": "Viktoria Mauer",
+      "gender": "female",
+      "birthYear": 1874,
+      "fatherId": "otto",
+      "motherId": "gisela",
+      "spouseIds": [
+        "rudolf"
+      ]
+    },
+    {
+      "id": "wilhelm",
+      "name": "Wilhelm Mauer",
+      "gender": "male",
+      "birthYear": 1877,
+      "fatherId": "otto",
+      "motherId": "gisela"
+    },
+    {
+      "id": "xaver",
+      "name": "Xaver Vaneck",
+      "gender": "male",
+      "birthYear": 1873,
+      "fatherId": "hugo",
+      "motherId": "mathilde",
+      "spouseIds": [
+        "zelda",
+        "ingrid"
+      ]
+    },
+    {
+      "id": "yvonne",
+      "name": "Yvonne Vaneck",
+      "gender": "female",
+      "birthYear": 1876,
+      "fatherId": "hugo",
+      "motherId": "mathilde",
+      "spouseIds": [
+        "anton"
+      ]
+    },
+    {
+      "id": "zelda",
+      "name": "Zelda Roth",
+      "gender": "female",
+      "birthYear": 1874,
+      "fatherId": "nikolaus",
+      "motherId": "ingrid",
+      "spouseIds": [
+        "xaver"
+      ]
+    },
+    {
+      "id": "anton",
+      "name": "Anton Vaneck",
+      "gender": "male",
+      "birthYear": 1878,
+      "fatherId": "johann",
+      "motherId": "klara",
+      "spouseIds": [
+        "yvonne"
+      ]
+    },
+    {
+      "id": "berta",
+      "name": "Berta Vaneck",
+      "gender": "female",
+      "birthYear": 1880,
+      "fatherId": "johann",
+      "motherId": "klara"
+    },
+    {
+      "id": "conrad",
+      "name": "Conrad Vaneck",
+      "gender": "male",
+      "birthYear": 1879,
+      "fatherId": "lorenz",
+      "spouseIds": [
+        "felicitas"
+      ]
+    },
+    {
+      "id": "dorothea",
+      "name": "Dorothea Vaneck",
+      "gender": "female",
+      "birthYear": 1890,
+      "fatherId": "rudolf",
+      "motherId": "gisela"
+    },
+    {
+      "id": "emmerich",
+      "name": "Emmerich Vaneck",
+      "gender": "male",
+      "birthYear": 1896,
+      "fatherId": "rudolf",
+      "motherId": "viktoria",
+      "spouseIds": [
+        "jutta"
+      ]
+    },
+    {
+      "id": "felicitas",
+      "name": "Felicitas Vaneck",
+      "gender": "female",
+      "birthYear": 1899,
+      "fatherId": "rudolf",
+      "motherId": "viktoria",
+      "spouseIds": [
+        "conrad"
+      ]
+    },
+    {
+      "id": "gottfried",
+      "name": "Gottfried Vaneck",
+      "gender": "male",
+      "birthYear": 1902,
+      "fatherId": "rudolf",
+      "motherId": "viktoria",
+      "spouseIds": [
+        "franziska"
+      ]
+    },
+    {
+      "id": "helena",
+      "name": "Helena Mauer",
+      "gender": "female",
+      "birthYear": 1897,
+      "fatherId": "ulrich",
+      "motherId": "theresa",
+      "spouseIds": [
+        "quentin"
+      ]
+    },
+    {
+      "id": "isidor",
+      "name": "Isidor Mauer",
+      "gender": "male",
+      "birthYear": 1900,
+      "fatherId": "ulrich",
+      "motherId": "theresa"
+    },
+    {
+      "id": "jutta",
+      "name": "Jutta Vaneck",
+      "gender": "female",
+      "birthYear": 1898,
+      "fatherId": "xaver",
+      "motherId": "zelda",
+      "spouseIds": [
+        "emmerich"
+      ]
+    },
+    {
+      "id": "kasimir",
+      "name": "Kasimir Vaneck",
+      "gender": "male",
+      "birthYear": 1901,
+      "fatherId": "xaver",
+      "motherId": "zelda",
+      "spouseIds": [
+        "leonore"
+      ]
+    },
+    {
+      "id": "leonore",
+      "name": "Leonore Vaneck",
+      "gender": "female",
+      "birthYear": 1903,
+      "fatherId": "anton",
+      "motherId": "yvonne",
+      "spouseIds": [
+        "kasimir"
+      ]
+    },
+    {
+      "id": "franziska",
+      "name": "Franziska Mauer",
+      "gender": "female",
+      "birthYear": 1905,
+      "fatherId": "wilhelm",
+      "motherId": "berta",
+      "spouseIds": [
+        "gottfried"
+      ]
+    },
+    {
+      "id": "nadja",
+      "name": "Nadja Vaneck",
+      "gender": "female",
+      "birthYear": 1926,
+      "fatherId": "emmerich",
+      "motherId": "jutta",
+      "spouseIds": [
+        "sigmund"
+      ]
+    },
+    {
+      "id": "oskar",
+      "name": "Oskar Vaneck",
+      "gender": "male",
+      "birthYear": 1928,
+      "fatherId": "emmerich",
+      "motherId": "jutta",
+      "spouseIds": [
+        "theodora"
+      ]
+    },
+    {
+      "id": "paula",
+      "name": "Paula Vaneck",
+      "gender": "female",
+      "birthYear": 1930,
+      "fatherId": "emmerich",
+      "motherId": "jutta",
+      "spouseIds": [
+        "viktor"
+      ]
+    },
+    {
+      "id": "quirin",
+      "name": "Quirin Vaneck",
+      "gender": "male",
+      "birthYear": 1932,
+      "fatherId": "emmerich",
+      "motherId": "jutta"
+    },
+    {
+      "id": "rosalind",
+      "name": "Rosalind Vaneck",
+      "gender": "female",
+      "birthYear": 1934,
+      "fatherId": "emmerich",
+      "motherId": "jutta"
+    },
+    {
+      "id": "sigmund",
+      "name": "Sigmund Vaneck",
+      "gender": "male",
+      "birthYear": 1927,
+      "fatherId": "conrad",
+      "motherId": "felicitas",
+      "spouseIds": [
+        "nadja"
+      ]
+    },
+    {
+      "id": "theodora",
+      "name": "Theodora Vaneck",
+      "gender": "female",
+      "birthYear": 1929,
+      "fatherId": "kasimir",
+      "motherId": "leonore",
+      "spouseIds": [
+        "oskar"
+      ]
+    },
+    {
+      "id": "maximilian",
+      "name": "Maximilian Vaneck",
+      "gender": "male",
+      "birthYear": 1928,
+      "fatherId": "gottfried",
+      "motherId": "franziska",
+      "spouseIds": [
+        "ursula"
+      ]
+    },
+    {
+      "id": "ursula",
+      "name": "Ursula Mauer",
+      "gender": "female",
+      "birthYear": 1931,
+      "fatherId": "isidor",
+      "spouseIds": [
+        "maximilian"
+      ]
+    },
+    {
+      "id": "viktor",
+      "name": "Viktor Vaneck",
+      "gender": "male",
+      "birthYear": 1922,
+      "motherId": "dorothea",
+      "spouseIds": [
+        "paula"
+      ]
+    },
+    {
+      "id": "wilhelmina",
+      "name": "Wilhelmina Vaneck",
+      "gender": "female",
+      "birthYear": 1952,
+      "fatherId": "sigmund",
+      "motherId": "nadja",
+      "spouseIds": [
+        "zacharias"
+      ]
+    },
+    {
+      "id": "xander",
+      "name": "Xander Vaneck",
+      "gender": "male",
+      "birthYear": 1955,
+      "fatherId": "sigmund",
+      "motherId": "nadja",
+      "spouseIds": [
+        "yvette"
+      ]
+    },
+    {
+      "id": "yvette",
+      "name": "Yvette Vaneck",
+      "gender": "female",
+      "birthYear": 1954,
+      "fatherId": "oskar",
+      "motherId": "theodora",
+      "spouseIds": [
+        "xander"
+      ]
+    },
+    {
+      "id": "zacharias",
+      "name": "Zacharias Vaneck",
+      "gender": "male",
+      "birthYear": 1956,
+      "fatherId": "maximilian",
+      "motherId": "ursula",
+      "spouseIds": [
+        "wilhelmina"
+      ]
+    },
+    {
+      "id": "adelheid",
+      "name": "Adelheid Vaneck",
+      "gender": "female",
+      "birthYear": 1953,
+      "fatherId": "viktor",
+      "motherId": "paula",
+      "spouseIds": [
+        "bruno"
+      ]
+    },
+    {
+      "id": "bruno",
+      "name": "Bruno Vaneck",
+      "gender": "male",
+      "birthYear": 1958,
+      "motherId": "rosalind",
+      "spouseIds": [
+        "adelheid"
+      ]
+    },
+    {
+      "id": "clemens",
+      "name": "Clemens Vaneck",
+      "gender": "male",
+      "birthYear": 1980,
+      "fatherId": "zacharias",
+      "motherId": "wilhelmina"
+    },
+    {
+      "id": "dorette",
+      "name": "Dorette Vaneck",
+      "gender": "female",
+      "birthYear": 1979,
+      "fatherId": "xander",
+      "motherId": "yvette"
+    },
+    {
+      "id": "emil",
+      "name": "Emil Vaneck",
+      "gender": "male",
+      "birthYear": 1981,
+      "fatherId": "bruno",
+      "motherId": "adelheid"
+    }
+  ]
+}

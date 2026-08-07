@@ -32,6 +32,6 @@ export function mean(values: number[]): number | null {
 }
 
 /** Positions are arithmetic on halves, so equality needs a little room. */
-export function near(a: number, b: number): boolean {
+export function isNear(a: number, b: number): boolean {
   return Math.abs(a - b) < 0.5;
 }

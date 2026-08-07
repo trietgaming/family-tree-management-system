@@ -1,5 +1,5 @@
 import { familySchema, type Family } from "./schema";
-import { findProblems, problem, type Problem } from "./validate";
+import { findProblems, errorAt, type Problem } from "./validate";
 
 export type ParseResult =
   | { ok: true; family: Family; problems: Problem[] }
@@ -17,7 +17,7 @@ export function parseFamily(text: string): ParseResult {
   } catch (cause) {
     return {
       ok: false,
-      problems: [problem([], cause instanceof Error ? cause.message : "Could not read the JSON")],
+      problems: [errorAt([], cause instanceof Error ? cause.message : "Could not read the JSON")],
     };
   }
 
@@ -25,7 +25,7 @@ export function parseFamily(text: string): ParseResult {
   if (!result.success) {
     return {
       ok: false,
-      problems: result.error.issues.map((issue) => problem(issue.path, issue.message)),
+      problems: result.error.issues.map((issue) => errorAt(issue.path, issue.message)),
     };
   }
 

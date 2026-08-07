@@ -28,14 +28,10 @@ export function PersonNode({ data, selected }: NodeProps<PersonNodeType>) {
         <p className="text-xs text-slate-500">{data.birthYear ?? "year unknown"}</p>
       </div>
 
-      {/* A card can be the left partner in one marriage and the right in
-          another, so each side needs both an outgoing and an incoming point. */}
-      <Handle id="top" type="target" position={Position.Top} className="!opacity-0" />
-      <Handle id="bottom" type="source" position={Position.Bottom} className="!opacity-0" />
-      <Handle id="left" type="source" position={Position.Left} className="!opacity-0" />
-      <Handle id="left-in" type="target" position={Position.Left} className="!opacity-0" />
-      <Handle id="right" type="source" position={Position.Right} className="!opacity-0" />
-      <Handle id="right-in" type="target" position={Position.Right} className="!opacity-0" />
+      {/* The router decides where a line runs, so these only exist because
+          React Flow wants an edge to name two of them. */}
+      <Handle type="target" position={Position.Top} className="!opacity-0" />
+      <Handle type="source" position={Position.Bottom} className="!opacity-0" />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 const BYTES = 5;
 
-function randomId(): string {
+function makeRandomId(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(BYTES));
 
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -16,9 +16,9 @@ function randomId(): string {
  * an unbiased generator is less to explain than a biased one that happens not
  * to matter.
  */
-export function newPersonId(taken: ReadonlySet<string>): string {
-  let id = randomId();
-  while (taken.has(id)) id = randomId();
+export function makePersonId(taken: ReadonlySet<string>): string {
+  let id = makeRandomId();
+  while (taken.has(id)) id = makeRandomId();
 
   return id;
 }

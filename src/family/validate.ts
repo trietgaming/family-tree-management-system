@@ -32,11 +32,11 @@ export function formatPath(segments: readonly PropertyKey[]): string {
   }, "");
 }
 
-export function problem(segments: readonly PropertyKey[], message: string): Problem {
+export function errorAt(segments: readonly PropertyKey[], message: string): Problem {
   return { path: formatPath(segments), segments, message, severity: "error" };
 }
 
-export function warning(segments: readonly PropertyKey[], message: string): Problem {
+export function warningAt(segments: readonly PropertyKey[], message: string): Problem {
   return { path: formatPath(segments), segments, message, severity: "warning" };
 }
 
@@ -49,24 +49,24 @@ export function findProblems(family: Family): Problem[] {
   const byId = indexById(people);
 
   return [
-    ...duplicateIds(people),
-    ...brokenReferences(people, byId),
-    ...ancestryLoops(byId),
-    ...contradictorySiblings(people, byId),
-    ...parentsAtOdds(people, byId),
-    ...unlikelyYears(people, byId),
-    ...oneSidedMarriages(people, byId),
+    ...findDuplicateIds(people),
+    ...findBrokenReferences(people, byId),
+    ...findAncestryLoops(byId),
+    ...findContradictorySiblings(people, byId),
+    ...findMismatchedParents(people, byId),
+    ...findUnlikelyYears(people, byId),
+    ...findOneSidedMarriages(people, byId),
   ];
 }
 
 /** What the roles say about a parent, against what the parent's record says. */
-function parentsAtOdds(people: Person[], byId: Map<string, Person>): Problem[] {
+function findMismatchedParents(people: Person[], byId: Map<string, Person>): Problem[] {
   const problems: Problem[] = [];
 
   people.forEach((person, index) => {
     if (person.fatherId && person.fatherId === person.motherId) {
       problems.push(
-        problem(
+        errorAt(
           ["people", index, "motherId"],
           `${person.name} has the same person down as both parents`,
         ),
@@ -82,7 +82,7 @@ function parentsAtOdds(people: Person[], byId: Map<string, Person>): Problem[] {
       if (!parent?.gender || parent.gender === expected || parent.gender === "other") continue;
 
       problems.push(
-        warning(
+        warningAt(
           ["people", index, field],
           `${parent.name} is down as the ${PARENT_LABEL[field]} of ${person.name}, but recorded as ${parent.gender}`,
         ),
@@ -93,14 +93,14 @@ function parentsAtOdds(people: Person[], byId: Map<string, Person>): Problem[] {
   return problems;
 }
 
-function unlikelyYears(people: Person[], byId: Map<string, Person>): Problem[] {
+function findUnlikelyYears(people: Person[], byId: Map<string, Person>): Problem[] {
   const problems: Problem[] = [];
   const thisYear = new Date().getFullYear();
 
   people.forEach((person, index) => {
     if (person.birthYear !== undefined && person.birthYear > thisYear) {
       problems.push(
-        warning(["people", index, "birthYear"], `${person.name} is not born yet`),
+        warningAt(["people", index, "birthYear"], `${person.name} is not born yet`),
       );
     }
 
@@ -114,7 +114,7 @@ function unlikelyYears(people: Person[], byId: Map<string, Person>): Problem[] {
       if (gap >= YOUNGEST_PARENT) continue;
 
       problems.push(
-        warning(
+        warningAt(
           ["people", index, field],
           gap <= 0
             ? `${parent.name} was born in ${parent.birthYear}, not before ${person.name} in ${person.birthYear}`
@@ -132,7 +132,7 @@ function unlikelyYears(people: Person[], byId: Map<string, Person>): Problem[] {
  * line is only drawn as a marriage when both say so — so a listing that goes
  * one way quietly turns into something weaker than intended.
  */
-function oneSidedMarriages(people: Person[], byId: Map<string, Person>): Problem[] {
+function findOneSidedMarriages(people: Person[], byId: Map<string, Person>): Problem[] {
   const problems: Problem[] = [];
 
   people.forEach((person, index) => {
@@ -142,7 +142,7 @@ function oneSidedMarriages(people: Person[], byId: Map<string, Person>): Problem
       if ((spouse.spouseIds ?? []).includes(person.id)) return;
 
       problems.push(
-        warning(
+        warningAt(
           ["people", index, "spouseIds", position],
           `${person.name} names ${spouse.name} as a spouse, but not the other way round`,
         ),
@@ -164,15 +164,15 @@ function indexById(people: Person[]): Map<string, Person> {
   return byId;
 }
 
-function parentsOf(person: Person): string[] {
+function parentIdsOf(person: Person): string[] {
   return PARENT_FIELDS.map((field) => person[field]).filter((id): id is string => Boolean(id));
 }
 
-function unknownId(id: string): string {
+function unknownIdMessage(id: string): string {
   return `No person has the id "${id}"`;
 }
 
-function duplicateIds(people: Person[]): Problem[] {
+function findDuplicateIds(people: Person[]): Problem[] {
   const seen = new Set<string>();
 
   return people.flatMap((person, index) => {
@@ -181,11 +181,11 @@ function duplicateIds(people: Person[]): Problem[] {
       return [];
     }
 
-    return [problem(["people", index, "id"], `Duplicate id "${person.id}"`)];
+    return [errorAt(["people", index, "id"], `Duplicate id "${person.id}"`)];
   });
 }
 
-function brokenReferences(people: Person[], byId: Map<string, Person>): Problem[] {
+function findBrokenReferences(people: Person[], byId: Map<string, Person>): Problem[] {
   const problems: Problem[] = [];
 
   people.forEach((person, index) => {
@@ -195,10 +195,10 @@ function brokenReferences(people: Person[], byId: Map<string, Person>): Problem[
 
       if (target === person.id) {
         problems.push(
-          problem(["people", index, field], `${person.name} cannot be their own parent`),
+          errorAt(["people", index, field], `${person.name} cannot be their own parent`),
         );
       } else if (!byId.has(target)) {
-        problems.push(warning(["people", index, field], unknownId(target)));
+        problems.push(warningAt(["people", index, field], unknownIdMessage(target)));
       }
     }
 
@@ -206,7 +206,7 @@ function brokenReferences(people: Person[], byId: Map<string, Person>): Problem[
       if (target !== person.id) return;
 
       problems.push(
-        problem(["people", index, "spouseIds", position], `${person.name} cannot marry themselves`),
+        errorAt(["people", index, "spouseIds", position], `${person.name} cannot marry themselves`),
       );
     });
 
@@ -214,7 +214,7 @@ function brokenReferences(people: Person[], byId: Map<string, Person>): Problem[
       person[field]?.forEach((target, position) => {
         if (byId.has(target)) return;
 
-        problems.push(warning(["people", index, field, position], unknownId(target)));
+        problems.push(warningAt(["people", index, field, position], unknownIdMessage(target)));
       });
     }
   });
@@ -227,11 +227,11 @@ function brokenReferences(people: Person[], byId: Map<string, Person>): Problem[
  * refused here rather than left to hang a tab. Only the first one is reported:
  * the others are usually the same loop entered from somewhere else.
  */
-function ancestryLoops(byId: Map<string, Person>): Problem[] {
+function findAncestryLoops(byId: Map<string, Person>): Problem[] {
   const acyclic = new Set<string>();
 
   for (const id of byId.keys()) {
-    const loop = loopAbove(id, byId, [], acyclic);
+    const loop = findLoopAbove(id, byId, [], acyclic);
 
     // Someone set as their own parent loops in a single step, and
     // brokenReferences already says that in plainer words.
@@ -239,7 +239,7 @@ function ancestryLoops(byId: Map<string, Person>): Problem[] {
 
     const names = loop.map((each) => byId.get(each)?.name ?? each);
 
-    return [problem(["people"], `Ancestry loops back on itself: ${names.join(" → ")}`)];
+    return [errorAt(["people"], `Ancestry loops back on itself: ${names.join(" → ")}`)];
   }
 
   return [];
@@ -251,7 +251,7 @@ function ancestryLoops(byId: Map<string, Person>): Problem[] {
  * loop; `acyclic` remembers who has been cleared, which keeps this linear
  * instead of re-walking every shared ancestor once per descendant.
  */
-function loopAbove(
+function findLoopAbove(
   id: string,
   byId: Map<string, Person>,
   trail: string[],
@@ -265,10 +265,10 @@ function loopAbove(
   const person = byId.get(id);
   if (!person) return null;
 
-  for (const parentId of parentsOf(person)) {
+  for (const parentId of parentIdsOf(person)) {
     if (!byId.has(parentId)) continue;
 
-    const loop = loopAbove(parentId, byId, [...trail, id], acyclic);
+    const loop = findLoopAbove(parentId, byId, [...trail, id], acyclic);
     if (loop) return loop;
   }
 
@@ -282,17 +282,17 @@ function loopAbove(
  * brief names the field. The parents win, and a contradiction is reported
  * rather than quietly resolved.
  */
-function contradictorySiblings(people: Person[], byId: Map<string, Person>): Problem[] {
+function findContradictorySiblings(people: Person[], byId: Map<string, Person>): Problem[] {
   const problems: Problem[] = [];
 
   people.forEach((person, index) => {
-    const parents = new Set(parentsOf(person));
+    const parents = new Set(parentIdsOf(person));
 
     person.siblingIds?.forEach((siblingId, position) => {
       const at = ["people", index, "siblingIds", position];
 
       if (siblingId === person.id) {
-        problems.push(warning(at, `${person.name} is listed as their own sibling`));
+        problems.push(warningAt(at, `${person.name} is listed as their own sibling`));
         return;
       }
 
@@ -300,9 +300,9 @@ function contradictorySiblings(people: Person[], byId: Map<string, Person>): Pro
       const sibling = byId.get(siblingId);
       if (!sibling) return;
 
-      if (!parentsOf(sibling).some((id) => parents.has(id))) {
+      if (!parentIdsOf(sibling).some((id) => parents.has(id))) {
         problems.push(
-          warning(at, `${person.name} and ${sibling.name} are listed as siblings but share no parent`),
+          warningAt(at, `${person.name} and ${sibling.name} are listed as siblings but share no parent`),
         );
       }
     });

@@ -13,7 +13,10 @@ were written while fixing the thing they break.
 | `brothers-marry-sisters.json` | Two brothers marry two sisters. Both sets of parents need a bar over children who sit interleaved, so the bars cross and have to be given separate heights. |
 | `nine-generations.json` | A single line of descent, nine deep. Tall rather than wide, and the check that depth costs nothing. |
 | `fourteen-children.json` | One couple, fourteen children. Three metres of bar, and the parents centred over the middle of it. |
+| `married-two-sisters.json` | A widower marries his late wife's sister. Both wives are daughters of the same couple, so one marriage belongs to two households at once and has to be drawn by exactly one of them. |
+| `tangled-generations.json` | Cousins marry, and one of them also has a child with the other's mother — who has a third child by her sister-in-law's husband. Marriage says a pair share a row, birth says one is below the other, and here the two rules chase each other in a circle. One woman stands in three pairings at once, so only the declared marriage seats her and the other two reach her by line. |
 | `unrelated-families.json` | Three families in one document, one of them a single mother. Also non-ASCII names and a name too long for its card. |
+| `dynasty.json` | Fifty-seven people, five founders, seven generations. Sibling marriage, first cousins twice over, double first cousins, a widower who marries his late wife's mother, a great-uncle who marries his great-niece, a nephew who has a child by his aunt, two single mothers, a single father, and a couple with five children. Everything the other files test at once, and the file to open when a change needs to be shown not to break anything. |
 | `every-warning.json` | Deliberately wrong, but still drawable: parents swapped, a child older than their father, a father aged nine, someone born in the year 3000, a parent who does not exist, and a declared sibling who is not one. |
 
 ## What is not here

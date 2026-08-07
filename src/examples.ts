@@ -14,7 +14,7 @@ export type Example = {
   text: string;
 };
 
-function labelFor(id: string): string {
+function labelOf(id: string): string {
   const words = id.replace(/-/g, " ");
 
   return words.charAt(0).toUpperCase() + words.slice(1);
@@ -24,7 +24,7 @@ const all: Example[] = Object.entries(files)
   .map(([path, text]) => {
     const id = path.split("/").pop()?.replace(/\.json$/, "") ?? path;
 
-    return { id, label: labelFor(id), text };
+    return { id, label: labelOf(id), text };
   })
   .sort((a, b) => a.label.localeCompare(b.label));
 

@@ -10,10 +10,8 @@ export type UnionNodeType = Node<Record<string, never>, "union">;
 export function UnionNode(_props: NodeProps<UnionNodeType>) {
   return (
     <div className="h-full w-full">
-      <Handle id="left" type="target" position={Position.Left} className="!opacity-0" />
-      <Handle id="right" type="target" position={Position.Right} className="!opacity-0" />
-      <Handle id="top" type="target" position={Position.Top} className="!opacity-0" />
-      <Handle id="bottom" type="source" position={Position.Bottom} className="!opacity-0" />
+      <Handle type="target" position={Position.Top} className="!opacity-0" />
+      <Handle type="source" position={Position.Bottom} className="!opacity-0" />
     </div>
   );
 }

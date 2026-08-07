@@ -1,66 +1,147 @@
-import { ancestorsOf, parentIdsOf, type FamilyModel } from "../model";
+import { isDeclaredUnion, parentIdsOf, type FamilyModel, type Union } from "../model";
 
 /**
- * A child sits one row below its parents, and partners share a row. Both rules
- * only ever push a row downwards, so repeating them settles rather than
- * oscillates. Cycles are refused by validation before this runs.
+ * A child sits one row below its parents, and partners share a row.
+ *
+ * The two rules can contradict each other, and not only in the obvious way of
+ * an ancestor marrying a descendant: any loop of parentage and marriage does
+ * it. So partners are merged into groups first, and a pairing is only merged
+ * when the merge leaves the parentage acyclic. What is left is a plain
+ * longest-path down a graph that is known to have a bottom.
  *
  * The rows are worked out separately from the columns because a spouse who
  * married in from another lineage has to line up with their partner, not with
  * their depth inside their own tree.
  */
 export function assignGenerations(model: FamilyModel): Map<string, number> {
-  const generations = new Map(model.order.map((person) => [person.id, 0]));
-  const at = (id: string) => generations.get(id) ?? 0;
+  const groupOf = groupPartners(model);
+  const graph = graphOf(model, groupOf);
+  const depths = deepenGroups(graph, sortGroups(graph));
 
-  /**
-   * A union between an ancestor and a descendant cannot have it both ways: one
-   * of them is below the other by birth, and levelling them would then push
-   * that same descendant down again, and again, until the pass limit stops it
-   * on a number that means nothing. Descent wins; the marriage is drawn as a
-   * link between two rows instead.
-   */
-  const acrossGenerations = new Set(
-    model.unions
-      .filter((union) => {
-        if (union.partnerIds.length !== 2) return false;
+  return new Map(
+    model.order.map((person) => [person.id, depths.get(groupOf.get(person.id) ?? "") ?? 0]),
+  );
+}
 
-        const [a, b] = union.partnerIds;
+type Graph = {
+  /** A group, and the groups that must sit below it. */
+  after: Map<string, Set<string>>;
+  /** A group, and how many groups must sit above it. */
+  above: Map<string, number>;
+};
 
-        return ancestorsOf(model, a).has(b) || ancestorsOf(model, b).has(a);
-      })
-      .map((union) => union.id),
+/**
+ * Merges partners into one group each, so a group is a row's worth of people
+ * who have to line up together.
+ *
+ * A pairing is offered, and taken only if the parentage still has a bottom
+ * afterwards. Declared marriages are offered first, so the pairing given up is
+ * the one that was merely inferred from a shared child; that union is still
+ * drawn, as a link between two rows rather than a line along one.
+ */
+function groupPartners(model: FamilyModel): Map<string, string> {
+  const couples = model.unions.filter((union) => union.partnerIds.length === 2);
+  const declaredFirst = [...couples].sort(
+    (a, b) => Number(isDeclaredUnion(model, b)) - Number(isDeclaredUnion(model, a)),
   );
 
-  for (let pass = 0; pass <= model.order.length; pass++) {
-    let moved = false;
-
-    for (const person of model.order) {
-      const parents = parentIdsOf(model, person.id);
-      if (parents.length === 0) continue;
-
-      const wanted = Math.max(...parents.map(at)) + 1;
-      if (wanted > at(person.id)) {
-        generations.set(person.id, wanted);
-        moved = true;
-      }
-    }
-
-    for (const union of model.unions) {
-      if (acrossGenerations.has(union.id)) continue;
-
-      const wanted = Math.max(...union.partnerIds.map(at));
-
-      for (const partnerId of union.partnerIds) {
-        if (wanted > at(partnerId)) {
-          generations.set(partnerId, wanted);
-          moved = true;
-        }
-      }
-    }
-
-    if (!moved) break;
+  const kept: Union[] = [];
+  for (const union of declaredFirst) {
+    if (!isCyclic(graphOf(model, mergeUnions(model, [...kept, union])))) kept.push(union);
   }
 
-  return generations;
+  return mergeUnions(model, kept);
+}
+
+/** Disjoint sets over people, joined by the given pairings. */
+function mergeUnions(model: FamilyModel, unions: Union[]): Map<string, string> {
+  const parent = new Map(model.order.map((person) => [person.id, person.id]));
+
+  const rootOf = (id: string): string => {
+    let root = id;
+    while ((parent.get(root) ?? root) !== root) root = parent.get(root) as string;
+
+    return root;
+  };
+
+  for (const union of unions) {
+    const [a, b] = union.partnerIds.map(rootOf);
+    if (a !== b) parent.set(a, b);
+  }
+
+  return new Map([...parent.keys()].map((id) => [id, rootOf(id)]));
+}
+
+/** One arrow per parent-to-child step, between the groups the two fell into. */
+function graphOf(model: FamilyModel, groupOf: Map<string, string>): Graph {
+  const after = new Map<string, Set<string>>();
+  const above = new Map<string, number>();
+
+  for (const group of new Set(groupOf.values())) {
+    after.set(group, new Set());
+    above.set(group, 0);
+  }
+
+  for (const person of model.order) {
+    const child = groupOf.get(person.id);
+    if (child === undefined) continue;
+
+    for (const parentId of parentIdsOf(model, person.id)) {
+      const parent = groupOf.get(parentId);
+      const below = parent === undefined ? undefined : after.get(parent);
+      if (!below || below.has(child)) continue;
+
+      below.add(child);
+      above.set(child, (above.get(child) ?? 0) + 1);
+    }
+  }
+
+  return { after, above };
+}
+
+/**
+ * Groups from the top down. A group only comes out once everything above it
+ * has, so a cycle never comes out at all and the result is short.
+ */
+function sortGroups(graph: Graph): string[] {
+  const above = new Map(graph.above);
+  const ready = [...above].filter(([, count]) => count === 0).map(([group]) => group);
+  const order: string[] = [];
+
+  while (ready.length > 0) {
+    const group = ready.pop() as string;
+    order.push(group);
+
+    for (const next of graph.after.get(group) ?? []) {
+      const left = (above.get(next) ?? 0) - 1;
+      above.set(next, left);
+
+      if (left === 0) ready.push(next);
+    }
+  }
+
+  return order;
+}
+
+function isCyclic(graph: Graph): boolean {
+  return sortGroups(graph).length < graph.after.size;
+}
+
+/**
+ * The longest way down to each group, which is the row it belongs on. Longest
+ * rather than shortest, so a person is below *every* line of descent that
+ * reaches them and no arrow is ever drawn upwards.
+ */
+function deepenGroups(graph: Graph, order: string[]): Map<string, number> {
+  const depths = new Map(order.map((group) => [group, 0]));
+
+  for (const group of order) {
+    const depth = depths.get(group) ?? 0;
+
+    for (const next of graph.after.get(group) ?? []) {
+      depths.set(next, Math.max(depths.get(next) ?? 0, depth + 1));
+    }
+  }
+
+  return depths;
 }

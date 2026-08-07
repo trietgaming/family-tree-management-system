@@ -1,7 +1,7 @@
 import { Background, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
 import { useEffect, useMemo } from "react";
 import type { Family } from "../../family/schema";
-import { BusEdge } from "./BusEdge";
+import { RoutedEdge } from "./RoutedEdge";
 import { JunctionNode } from "./JunctionNode";
 import { Legend } from "./Legend";
 import { PersonNode } from "./PersonNode";
@@ -10,7 +10,7 @@ import { UnionNode } from "./UnionNode";
 
 // Outside the component: React Flow rebuilds everything when these change.
 const nodeTypes = { person: PersonNode, union: UnionNode, junction: JunctionNode };
-const edgeTypes = { bus: BusEdge };
+const edgeTypes = { routed: RoutedEdge };
 
 export function FamilyTree({ family }: { family: Family | null }) {
   const drawn = useMemo(() => toFlow(family), [family]);

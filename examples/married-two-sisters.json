@@ -1,0 +1,70 @@
+{
+  "people": [
+    {
+      "id": "p",
+      "name": "Their father",
+      "gender": "male",
+      "birthYear": 1900,
+      "spouseIds": [
+        "q"
+      ]
+    },
+    {
+      "id": "q",
+      "name": "Their mother",
+      "gender": "female",
+      "birthYear": 1902,
+      "spouseIds": [
+        "p"
+      ]
+    },
+    {
+      "id": "w",
+      "name": "The first wife",
+      "gender": "female",
+      "birthYear": 1925,
+      "fatherId": "p",
+      "motherId": "q",
+      "spouseIds": [
+        "x"
+      ]
+    },
+    {
+      "id": "x",
+      "name": "The widower",
+      "gender": "male",
+      "birthYear": 1923,
+      "spouseIds": [
+        "w",
+        "y"
+      ]
+    },
+    {
+      "id": "y",
+      "name": "Her sister",
+      "gender": "female",
+      "birthYear": 1930,
+      "fatherId": "p",
+      "motherId": "q",
+      "spouseIds": [
+        "x"
+      ]
+    },
+    {
+      "id": "s1",
+      "name": "Child of the first",
+      "gender": "male",
+      "birthYear": 1949,
+      "fatherId": "x",
+      "motherId": "w"
+    },
+    {
+      "id": "s2",
+      "name": "Child of the second",
+      "gender": "female",
+      "birthYear": 1956,
+      "fatherId": "x",
+      "motherId": "y"
+    }
+  ]
+}
