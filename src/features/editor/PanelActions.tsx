@@ -4,6 +4,8 @@ import { examples } from "../../examples";
 type PanelActionsProps = {
   /** What Copy puts on the clipboard. */
   value: string;
+  /** Absent while the document does not parse, because there is nothing to add to. */
+  onAdd: (() => void) | null;
   onLoad: (text: string) => void;
 };
 
@@ -16,7 +18,7 @@ const LABEL = {
 const control =
   "rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs text-slate-600 transition hover:bg-slate-50";
 
-export function PanelActions({ value, onLoad }: PanelActionsProps) {
+export function PanelActions({ value, onAdd, onLoad }: PanelActionsProps) {
   const [state, setState] = useState<keyof typeof LABEL>("idle");
 
   useEffect(() => {
@@ -65,6 +67,10 @@ export function PanelActions({ value, onLoad }: PanelActionsProps) {
 
       <button type="button" onClick={copy} className={control}>
         {LABEL[state]}
+      </button>
+
+      <button type="button" onClick={() => onAdd?.()} disabled={onAdd === null} className={control}>
+        Add person
       </button>
     </div>
   );

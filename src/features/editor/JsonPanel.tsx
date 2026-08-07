@@ -7,6 +7,7 @@ type JsonPanelProps = {
   problems: Problem[];
   /** Shown when nothing is wrong at all. */
   summary: string;
+  onAdd: (() => void) | null;
   onChange: (value: string) => void;
 };
 
@@ -15,7 +16,7 @@ const TONE = {
   warning: "text-amber-700",
 };
 
-export function JsonPanel({ value, problems, summary, onChange }: JsonPanelProps) {
+export function JsonPanel({ value, problems, summary, onAdd, onChange }: JsonPanelProps) {
   const errors = problems.filter((each) => each.severity === "error").length;
 
   return (
@@ -27,7 +28,7 @@ export function JsonPanel({ value, problems, summary, onChange }: JsonPanelProps
         </p>
       </div>
 
-      <PanelActions value={value} onLoad={onChange} />
+      <PanelActions value={value} onAdd={onAdd} onLoad={onChange} />
 
       <JsonEditor value={value} problems={problems} onChange={onChange} />
 

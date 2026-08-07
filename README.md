@@ -256,6 +256,41 @@ The editor is built once and only accepts text from outside when it differs
 from what it already holds. Without that, the app's own edits arrive back
 through `onChange` and reset the cursor on every keystroke.
 
+## Editing on the canvas
+
+Clicking a card opens a form for that person. Every control writes straight back
+into the JSON, which stays the only thing the drawing is made from — there is no
+second copy of the family to keep in step.
+
+The write goes through `family/edit.ts`, and it works on `JSON.parse` of the
+text rather than on the parsed family. The schema returns the keys it knows in
+its own order and drops the ones it does not, so a round trip through it would
+rewrite parts of the document nobody touched. Going through the raw JSON keeps
+the key order and any extra keys; the only thing the app imposes is two-space
+indentation.
+
+Four rules the form follows:
+
+- **Clearing a field removes it.** Absent and `null` mean the same thing to the
+  schema, and absent is what the examples are written in.
+- **Marriage is written on both people.** A one-sided `spouseIds` is a warning,
+  and the form should not be able to produce a document it then complains about.
+- **Deleting unlinks, it does not cascade.** The person goes, and every mention
+  of them goes with them; their children stay and lose a parent. Deleting a
+  grandparent should not quietly delete the family below them.
+- **A parent picker never offers a descendant.** That would make somebody their
+  own ancestor, which is an error rather than a warning — the drawing would stop
+  at the last document that held together, and a picker able to freeze the page
+  is a picker offering the wrong thing.
+
+While the document does not parse there is nothing safe to write back over, so
+the form steps aside until it does.
+
+Because the layer is text in and text out, it is checked without a browser: an
+edit, an add, a link and a delete run over each example and the result is parsed
+again. One round costs 2 ms on the fifty-seven person file, which is the whole
+of write, re-parse and re-layout.
+
 ## Between visits
 
 The document is kept in `localStorage` and comes back on reload. It is written

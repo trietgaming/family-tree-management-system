@@ -4,6 +4,7 @@ export type PersonData = {
   name: string;
   birthYear?: number;
   gender?: "male" | "female" | "other";
+  isSelected?: boolean;
 };
 
 export type PersonNodeType = Node<PersonData, "person">;
@@ -14,11 +15,11 @@ const ACCENT: Record<string, string> = {
   other: "bg-violet-400",
 };
 
-export function PersonNode({ data, selected }: NodeProps<PersonNodeType>) {
+export function PersonNode({ data }: NodeProps<PersonNodeType>) {
   return (
     <div
-      className={`flex h-full w-full overflow-hidden rounded-lg border bg-white ${
-        selected ? "border-slate-900" : "border-slate-300"
+      className={`flex h-full w-full cursor-pointer overflow-hidden rounded-lg border bg-white ${
+        data.isSelected ? "border-slate-900 ring-2 ring-slate-900/20" : "border-slate-300"
       }`}
     >
       <div className={`w-1 shrink-0 ${ACCENT[data.gender ?? ""] ?? "bg-slate-300"}`} />

@@ -12,16 +12,34 @@ import { UnionNode } from "./UnionNode";
 const nodeTypes = { person: PersonNode, union: UnionNode, junction: JunctionNode };
 const edgeTypes = { routed: RoutedEdge };
 
-export function FamilyTree({ family }: { family: Family | null }) {
+type FamilyTreeProps = {
+  family: Family | null;
+  selectedId: string | null;
+  onSelect: (id: string | null) => void;
+};
+
+export function FamilyTree({ family, selectedId, onSelect }: FamilyTreeProps) {
   const drawn = useMemo(() => toFlow(family), [family]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(drawn.nodes);
+  // Selection is ours rather than React Flow's, because the node array is
+  // rebuilt whenever the document changes and its own flag would not survive.
+  const marked = useMemo(
+    () =>
+      drawn.nodes.map((node) =>
+        node.type === "person"
+          ? { ...node, data: { ...node.data, isSelected: node.id === selectedId } }
+          : node,
+      ),
+    [drawn.nodes, selectedId],
+  );
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(marked);
   const [edges, setEdges, onEdgesChange] = useEdgesState(drawn.edges);
 
   useEffect(() => {
-    setNodes(drawn.nodes);
+    setNodes(marked);
     setEdges(drawn.edges);
-  }, [drawn, setNodes, setEdges]);
+  }, [marked, drawn.edges, setNodes, setEdges]);
 
   return (
     <ReactFlow
@@ -31,7 +49,10 @@ export function FamilyTree({ family }: { family: Family | null }) {
       edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
+      onNodeClick={(_, node) => onSelect(node.type === "person" ? node.id : null)}
+      onPaneClick={() => onSelect(null)}
       nodesConnectable={false}
+      elementsSelectable={false}
       minZoom={0.1}
       fitView
     >
