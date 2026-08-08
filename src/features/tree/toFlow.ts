@@ -1,7 +1,6 @@
 import type { Edge, Node } from "@xyflow/react";
 import { layout } from "../../family/layout";
-import { PersonRepository, type Person } from "../../family/model";
-import type { FamilyDocument } from "../../family/schema";
+import type { Person, PersonRepository } from "../../family/model";
 import { DASH, DESCENT, DOT, MARRIAGE } from "./palette";
 
 /**
@@ -12,10 +11,10 @@ import { DASH, DESCENT, DOT, MARRIAGE } from "./palette";
  * This is also where people turn back into ids. React Flow keys everything by
  * string, so the boundary has to be somewhere, and here is as late as it gets.
  */
-export function toFlow(document: FamilyDocument | null): { nodes: Node[]; edges: Edge[] } {
-  if (!document) return { nodes: [], edges: [] };
+export function toFlow(repo: PersonRepository | null): { nodes: Node[]; edges: Edge[] } {
+  if (!repo) return { nodes: [], edges: [] };
 
-  const drawn = layout(PersonRepository.of(document));
+  const drawn = layout(repo);
 
   const nodes: Node[] = drawn.nodes.map((node) => ({
     id: node.id,

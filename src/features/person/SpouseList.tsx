@@ -1,43 +1,46 @@
-import type { PersonRecord } from "../../family/schema";
+import type { Mention, Person } from "../../family/model";
 import { PersonSelect } from "./PersonSelect";
 import { PickButton } from "./PickButton";
 import { labelOf } from "./kin";
 import { PICK_LABEL } from "./picking";
 
 type SpouseListProps = {
-  spouseIds: string[];
-  byId: Map<string, PersonRecord>;
+  spouses: Mention[];
   /** Everybody who could be added, minus the ones already here. */
-  candidates: PersonRecord[];
+  candidates: Person[];
   isArmed: boolean;
   onArm: () => void;
-  onLink: (id: string) => void;
-  onUnlink: (id: string) => void;
+  onLink: (person: Person) => void;
+  onUnlink: (spouse: Mention) => void;
 };
 
 /**
  * A list rather than a picker, because a person can have several spouses and
  * removing one has to be as easy as adding it.
+ *
+ * A mention the document cannot resolve is shown by its id. It is the only
+ * handle there is on it, and leaving it out would leave no way to take it off.
  */
 export function SpouseList(props: SpouseListProps) {
-  const { spouseIds, byId, candidates, isArmed, onArm, onLink, onUnlink } = props;
-  const free = candidates.filter((person) => !spouseIds.includes(person.id));
+  const { spouses, candidates, isArmed, onArm, onLink, onUnlink } = props;
+  const named = spouses.map((spouse) => spouse.id.value);
+  const free = candidates.filter((person) => !named.includes(person.id.value));
 
   return (
     <div className="space-y-1.5">
-      {spouseIds.map((id) => (
+      {spouses.map((spouse) => (
         <div
-          key={id}
+          key={spouse.id.value}
           className="flex items-center justify-between rounded-md bg-slate-100 py-1 pr-1 pl-2.5"
         >
           <span className="truncate text-sm text-slate-700">
-            {byId.has(id) ? labelOf(byId.get(id) as PersonRecord) : id}
+            {spouse.person === null ? spouse.id.value : labelOf(spouse.person)}
           </span>
 
           <button
             type="button"
-            aria-label={`Remove ${byId.get(id)?.name ?? id}`}
-            onClick={() => onUnlink(id)}
+            aria-label={`Remove ${spouse.person?.name ?? spouse.id.value}`}
+            onClick={() => onUnlink(spouse)}
             className="rounded px-1.5 text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
           >
             ×
@@ -48,10 +51,10 @@ export function SpouseList(props: SpouseListProps) {
       {free.length > 0 && (
         <div className="flex items-center gap-1.5">
           <PersonSelect
-            value=""
+            value={null}
             people={free}
             blank="Add a spouse…"
-            onChange={(id) => id !== null && onLink(id)}
+            onChange={(person) => person !== null && onLink(person)}
           />
 
           <PickButton isArmed={isArmed} what={PICK_LABEL.spouse} onToggle={onArm} />

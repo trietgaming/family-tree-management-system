@@ -1,4 +1,4 @@
-import { ANY_YEAR, isRangeSet, yearFrom, type YearRange } from "../../family/years";
+import { YearRange, yearFrom } from "../../family/years";
 
 type YearFilterProps = {
   range: YearRange;
@@ -24,7 +24,7 @@ export function YearFilter({ range, onChange }: YearFilterProps) {
         value={range.from ?? ""}
         placeholder="yyyy"
         aria-label="Born no earlier than"
-        onChange={(event) => onChange({ ...range, from: yearFrom(event.target.value) })}
+        onChange={(event) => onChange(range.startingAt(yearFrom(event.target.value)))}
         className={box}
       />
       <span>to</span>
@@ -33,14 +33,14 @@ export function YearFilter({ range, onChange }: YearFilterProps) {
         value={range.to ?? ""}
         placeholder="yyyy"
         aria-label="Born no later than"
-        onChange={(event) => onChange({ ...range, to: yearFrom(event.target.value) })}
+        onChange={(event) => onChange(range.endingAt(yearFrom(event.target.value)))}
         className={box}
       />
 
-      {isRangeSet(range) && (
+      {range.isSet && (
         <button
           type="button"
-          onClick={() => onChange(ANY_YEAR)}
+          onClick={() => onChange(YearRange.ANY)}
           aria-label="Clear the year filter"
           title="Clear the year filter"
           className="rounded px-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"

@@ -70,6 +70,34 @@ export class PersonRepository {
   }
 
   /**
+   * Everyone below somebody, found by walking down rather than by testing
+   * everybody. A document can name a loop of parentage — validation reports it
+   * but the walk still has to survive it — so a person already seen is not
+   * followed twice.
+   */
+  descendantsOf(person: Person): Person[] {
+    const below = new Set<Person>();
+    const pending = [...this.childrenOf(person)];
+
+    while (pending.length > 0) {
+      const child = pending.pop() as Person;
+      if (below.has(child)) continue;
+
+      below.add(child);
+      pending.push(...this.childrenOf(child));
+    }
+
+    return [...below];
+  }
+
+  /** Who somebody could be joined to: everybody but themselves and their own line. */
+  candidatesFor(person: Person): Person[] {
+    const below = new Set(this.descendantsOf(person));
+
+    return this.order.filter((each) => each !== person && !below.has(each));
+  }
+
+  /**
    * One union for every set of parents that actually produced someone, then
    * one for every couple with no children, who would otherwise have nothing
    * joining them. Marriage and parenthood are separate facts here.

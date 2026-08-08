@@ -11,7 +11,7 @@ import {
   type Edge,
 } from "@xyflow/react";
 import { useEffect, useMemo, useRef } from "react";
-import type { FamilyDocument } from "../../family/schema";
+import type { PersonRepository } from "../../family/model";
 import type { YearRange } from "../../family/years";
 import { AddPerson } from "./AddPerson";
 import { RoutedEdge } from "./RoutedEdge";
@@ -122,7 +122,7 @@ function tieOfMark(about: string[], ties: Ties, selectedId: string | null): Tie 
 }
 
 type FamilyTreeProps = {
-  family: FamilyDocument | null;
+  repo: PersonRepository | null;
   selectedId: string | null;
   /** Where the view should go next. Clicking a card is deliberately not this. */
   view: ViewRequest | null;
@@ -149,10 +149,10 @@ export function FamilyTree(props: FamilyTreeProps) {
 }
 
 function Canvas(props: FamilyTreeProps) {
-  const { family, selectedId, lineId, view, dimmed, range, isPicking } = props;
+  const { repo, selectedId, lineId, view, dimmed, range, isPicking } = props;
   const { onSelect, onLine, onAdd, onRange } = props;
   const flow = useReactFlow();
-  const drawn = useMemo(() => toFlow(family), [family]);
+  const drawn = useMemo(() => toFlow(repo), [repo]);
 
   /**
    * Selection and dimming, applied over the drawing rather than inside it.

@@ -1,11 +1,11 @@
-import { idProblemOf } from "../../family/edit";
+import { PersonId } from "../../family/model";
 import { DraftField } from "./DraftField";
 
 type IdFieldProps = {
-  id: string;
-  /** Every id in the document, so a clash is caught before it is written. */
-  taken: string[];
-  onRename: (to: string) => void;
+  id: PersonId;
+  /** Why the typed id cannot be used, or null when it can. */
+  refuse: (to: PersonId) => string | null;
+  onRename: (to: PersonId) => void;
 };
 
 /**
@@ -13,13 +13,13 @@ type IdFieldProps = {
  * so a new one has to be carried to every mention of them at once. It is
  * refused outright when it would be empty or would name two people the same.
  */
-export function IdField({ id, taken, onRename }: IdFieldProps) {
+export function IdField({ id, refuse, onRename }: IdFieldProps) {
   return (
     <DraftField
       label="Id"
-      value={id}
-      refuse={(draft) => idProblemOf(taken, id, draft)}
-      onCommit={onRename}
+      value={id.value}
+      refuse={(draft) => refuse(PersonId.of(draft))}
+      onCommit={(draft) => onRename(PersonId.of(draft))}
       isMono
     />
   );

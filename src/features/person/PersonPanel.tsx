@@ -1,5 +1,11 @@
-import type { PlainField } from "../../family/edit";
-import { NEEDS_NAME, type PersonRecord } from "../../family/schema";
+import type {
+  Mention,
+  ParentRole,
+  Person,
+  PersonId,
+  PersonRepository,
+} from "../../family/model";
+import { NEEDS_NAME, type Gender } from "../../family/schema";
 import { yearFrom } from "../../family/years";
 import { DraftField } from "./DraftField";
 import { Field, inputStyle } from "./Field";
@@ -7,41 +13,40 @@ import { IdField } from "./IdField";
 import { PersonSelect } from "./PersonSelect";
 import { PickButton } from "./PickButton";
 import { SpouseList } from "./SpouseList";
-import { candidatesFor } from "./kin";
 import { PICK_LABEL, type PickTarget } from "./picking";
 
 type PersonPanelProps = {
-  person: PersonRecord;
-  people: PersonRecord[];
-  /** Every id in the document, including the ones the schema rejected. */
-  taken: string[];
+  person: Person;
+  repo: PersonRepository;
   /** The field waiting for a card to be clicked, if any. */
   picking: PickTarget | null;
-  onSet: (field: PlainField, value: string | number | null) => void;
-  onRename: (to: string) => void;
+  onName: (name: string) => void;
+  onBirthYear: (year: number | null) => void;
+  onGender: (gender: Gender | null) => void;
+  onParent: (role: ParentRole, parent: Person | null) => void;
+  refuseId: (to: PersonId) => string | null;
+  onRename: (to: PersonId) => void;
   onArm: (target: PickTarget | null) => void;
   /** Move the canvas onto them, for when the panel is open and they are not. */
   onFocus: () => void;
-  onLink: (spouseId: string) => void;
-  onUnlink: (spouseId: string) => void;
+  onLink: (spouse: Person) => void;
+  onUnlink: (spouse: Mention) => void;
   onRemove: () => void;
   onClose: () => void;
 };
 
-const GENDERS = ["male", "female", "other"] as const;
+const GENDERS: Gender[] = ["male", "female", "other"];
 
-const PARENTS = [
-  { field: "fatherId", label: "Father" },
-  { field: "motherId", label: "Mother" },
-] as const;
+const PARENTS: { role: ParentRole; label: string }[] = [
+  { role: "father", label: "Father" },
+  { role: "mother", label: "Mother" },
+];
 
 export function PersonPanel(props: PersonPanelProps) {
-  const { person, people, taken, picking, onSet, onRename, onArm, onFocus } = props;
-  const { onLink, onUnlink, onRemove, onClose } = props;
+  const { person, repo, picking, onName, onBirthYear, onGender, onParent } = props;
+  const { refuseId, onRename, onArm, onFocus, onLink, onUnlink, onRemove, onClose } = props;
 
-  const byId = new Map(people.map((each) => [each.id, each]));
-  const candidates = candidatesFor(people, person);
-
+  const candidates = repo.candidatesFor(person);
   const arm = (target: PickTarget) => onArm(picking === target ? null : target);
 
   return (
@@ -74,7 +79,7 @@ export function PersonPanel(props: PersonPanelProps) {
         label="Name"
         value={person.name}
         refuse={(draft) => (draft.trim() === "" ? NEEDS_NAME : null)}
-        onCommit={(name) => onSet("name", name)}
+        onCommit={onName}
       />
 
       {picking !== null && (
@@ -90,14 +95,14 @@ export function PersonPanel(props: PersonPanelProps) {
         </p>
       )}
 
-      <IdField id={person.id} taken={taken} onRename={onRename} />
+      <IdField id={person.id} refuse={refuseId} onRename={onRename} />
 
       <Field label="Born">
         <input
           type="number"
           value={person.birthYear ?? ""}
           placeholder="Unknown"
-          onChange={(event) => onSet("birthYear", yearFrom(event.target.value))}
+          onChange={(event) => onBirthYear(yearFrom(event.target.value))}
           className={inputStyle}
         />
       </Field>
@@ -105,7 +110,7 @@ export function PersonPanel(props: PersonPanelProps) {
       <Field label="Gender">
         <select
           value={person.gender ?? ""}
-          onChange={(event) => onSet("gender", event.target.value || null)}
+          onChange={(event) => onGender((event.target.value || null) as Gender | null)}
           className={inputStyle}
         >
           <option value="">Not recorded</option>
@@ -117,20 +122,20 @@ export function PersonPanel(props: PersonPanelProps) {
         </select>
       </Field>
 
-      {PARENTS.map(({ field, label }) => (
-        <Field key={field} label={label} tie="parent">
+      {PARENTS.map(({ role, label }) => (
+        <Field key={role} label={label} tie="parent">
           <div className="flex items-center gap-1.5">
             <PersonSelect
-              value={person[field]}
+              value={person.parentAs(role)}
               people={candidates}
               blank="Not recorded"
-              onChange={(id) => onSet(field, id)}
+              onChange={(parent) => onParent(role, parent)}
             />
 
             <PickButton
-              isArmed={picking === field}
-              what={PICK_LABEL[field]}
-              onToggle={() => arm(field)}
+              isArmed={picking === role}
+              what={PICK_LABEL[role]}
+              onToggle={() => arm(role)}
             />
           </div>
         </Field>
@@ -138,8 +143,7 @@ export function PersonPanel(props: PersonPanelProps) {
 
       <Field label="Spouses" tie="partner">
         <SpouseList
-          spouseIds={person.spouseIds ?? []}
-          byId={byId}
+          spouses={person.spouseMentions}
           candidates={candidates}
           isArmed={picking === "spouse"}
           onArm={() => arm("spouse")}
@@ -153,8 +157,8 @@ export function PersonPanel(props: PersonPanelProps) {
       <button
         type="button"
         onClick={onRemove}
-        disabled={people.length === 1}
-        title={people.length === 1 ? "A family needs at least one person" : undefined}
+        disabled={repo.all.length === 1}
+        title={repo.all.length === 1 ? "A family needs at least one person" : undefined}
         className="mt-auto rounded-md border border-red-200 px-2.5 py-1.5 text-xs text-red-700 transition hover:bg-red-50 disabled:border-slate-200 disabled:text-slate-400 disabled:hover:bg-transparent"
       >
         Delete this person

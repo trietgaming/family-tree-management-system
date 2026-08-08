@@ -1,7 +1,11 @@
 import type { Gender, PersonRecord } from "../schema";
+import { Mention } from "./Mention";
 import { PersonId } from "./PersonId";
 import type { PersonRepository } from "./PersonRepository";
 import type { Union } from "./Union";
+
+/** The two named parents. A role rather than a field name, so nothing spells "fatherId". */
+export type ParentRole = "father" | "mother";
 
 /**
  * Somebody in the family, as the rest of the program should know them.
@@ -64,14 +68,39 @@ export class Person {
     return this.bornInto?.partners ?? [];
   }
 
+  parentAs(role: ParentRole): Person | null {
+    return role === "father" ? this.father : this.mother;
+  }
+
   get children(): Person[] {
     return this.repo.childrenOf(this);
   }
 
-  /** Those this person names. Naming is not mutual until both do it. */
+  /**
+   * Everyone below this person.
+   *
+   * The parent pickers leave these out. Choosing one would make the person
+   * their own ancestor, which is an error rather than a warning — the drawing
+   * would stop at the last document that held together, and a picker that can
+   * freeze the page is a picker offering the wrong thing.
+   */
+  get descendants(): Person[] {
+    return this.repo.descendantsOf(this);
+  }
+
+  /** Everyone this person names as a spouse, including any the document lacks. */
+  get spouseMentions(): Mention[] {
+    return (this.record.spouseIds ?? []).map((id) => {
+      const settled = PersonId.of(id);
+
+      return Mention.of(settled, this.repo.findById(settled));
+    });
+  }
+
+  /** Those this person names and the document has. Naming is not mutual until both do it. */
   get spouses(): Person[] {
-    return (this.record.spouseIds ?? [])
-      .map((id) => this.lookUp(id))
+    return this.spouseMentions
+      .map((mention) => mention.person)
       .filter((person): person is Person => person !== null);
   }
 
