@@ -72,6 +72,16 @@ GitHub Pages, built by Actions on every push to `main`. The workflow is
 then upload `dist/` and deploy it. No secrets and no environment variables:
 the app has no backend to point at.
 
+Pages has to be switched on once before the first run, because a workflow
+cannot switch it on itself. The token a run is given may `pages: write`, which
+is permission to publish, but creating the site needs admin of the repository
+and no run has that. Either set **Settings → Pages → Source** to *GitHub
+Actions*, or:
+
+```bash
+gh api -X POST repos/OWNER/REPO/pages -f build_type=workflow
+```
+
 The code lives in a folder of a larger private repository and is published to
 a public one, because Pages needs a public repository and the exercise asks for
 one. A single subtree push keeps them in step:
