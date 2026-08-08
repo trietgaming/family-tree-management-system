@@ -2,9 +2,18 @@ import { z } from "zod";
 
 const personId = z.string().trim().min(1, "An id cannot be empty");
 
+export const NEEDS_NAME = "A person needs a name";
+
+/**
+ * Refused rather than trimmed. `.trim()` rewrites what it is given, and a name
+ * being typed into the form comes back through here on its way to the box — so
+ * trimming it would eat the space between two words as it was pressed.
+ */
+const personName = z.string().refine((name) => name.trim() !== "", NEEDS_NAME);
+
 export const personSchema = z.object({
   id: personId,
-  name: z.string().trim().min(1, "A person needs a name"),
+  name: personName,
   gender: z.enum(["male", "female", "other"]).optional(),
   birthYear: z.number().int().min(1).max(9999).optional(),
   fatherId: personId.nullable().optional(),

@@ -1,6 +1,7 @@
 import type { PlainField } from "../../family/edit";
-import type { Person } from "../../family/schema";
+import { NEEDS_NAME, type Person } from "../../family/schema";
 import { yearFrom } from "../../family/years";
+import { DraftField } from "./DraftField";
 import { Field, inputStyle } from "./Field";
 import { IdField } from "./IdField";
 import { PersonSelect } from "./PersonSelect";
@@ -69,13 +70,12 @@ export function PersonPanel(props: PersonPanelProps) {
         </div>
       </div>
 
-      <Field label="Name">
-        <input
-          value={person.name}
-          onChange={(event) => onSet("name", event.target.value)}
-          className={inputStyle}
-        />
-      </Field>
+      <DraftField
+        label="Name"
+        value={person.name}
+        refuse={(draft) => (draft.trim() === "" ? NEEDS_NAME : null)}
+        onCommit={(name) => onSet("name", name)}
+      />
 
       {picking !== null && (
         <p
@@ -118,7 +118,7 @@ export function PersonPanel(props: PersonPanelProps) {
       </Field>
 
       {PARENTS.map(({ field, label }) => (
-        <Field key={field} label={label}>
+        <Field key={field} label={label} tie="parent">
           <div className="flex items-center gap-1.5">
             <PersonSelect
               value={person[field]}
@@ -136,7 +136,7 @@ export function PersonPanel(props: PersonPanelProps) {
         </Field>
       ))}
 
-      <Field label="Spouses">
+      <Field label="Spouses" tie="partner">
         <SpouseList
           spouseIds={person.spouseIds ?? []}
           byId={byId}

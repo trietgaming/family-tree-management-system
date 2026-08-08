@@ -34,6 +34,13 @@ export const TIE_DOT: Record<Tie, string> = {
   partner: "bg-purple-500",
 };
 
+/** For naming a tie in words, where the drawing names it in lines. */
+export const TIE_TEXT: Record<Tie, string> = {
+  parent: "text-orange-600",
+  child: "text-green-600",
+  partner: "text-purple-600",
+};
+
 /** Birth before marriage, the way the rows are worked out. */
 const CLOSENESS: Record<Tie, number> = { parent: 0, child: 1, partner: 2 };
 

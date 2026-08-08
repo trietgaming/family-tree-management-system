@@ -281,16 +281,22 @@ rewrite parts of the document nobody touched. Going through the raw JSON keeps
 the key order and any extra keys; the only thing the app imposes is two-space
 indentation.
 
-Five rules the form follows:
+Six rules the form follows:
 
 - **An id can be changed, and every reference changes with it.** An id is not a
   field like the others: it is how the document names somebody, so editing one
   means rewriting every `fatherId`, `motherId`, `spouseIds` and `siblingIds`
   that mentions them in the same breath. It is refused outright — nothing
   written — when the result would be empty or would name two people the same,
-  and the box says which. That field alone keeps what was typed rather than
-  writing on every keystroke, because clearing it to retype is an ordinary
-  thing to do and an empty id is not a document.
+  and the box says which.
+- **A box the document can refuse keeps what was typed.** Name and id both:
+  clearing one to retype is an ordinary thing to do, and neither an empty name
+  nor an empty id is a document the drawing survives. Those two hold a draft
+  and only reach the document at the moments it spells something usable. The
+  schema helps by refusing a blank name rather than trimming it — `.trim()`
+  rewrites what it is given, and since the name comes back through the schema
+  on its way to the box, trimming would eat the space between two words as it
+  was pressed.
 
 - **Clearing a field removes it.** Absent and `null` mean the same thing to the
   schema, and absent is what the examples are written in.

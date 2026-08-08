@@ -2,7 +2,7 @@
   "people": [
     {
       "id": "abe",
-      "name": "Abraham Simpson",
+      "name": "Abe Simpson",
       "gender": "male",
       "birthYear": 1927,
       "spouseIds": [
@@ -17,12 +17,6 @@
       "spouseIds": [
         "abe"
       ]
-    },
-    {
-      "id": "edwina",
-      "name": "Edwina",
-      "gender": "female",
-      "birthYear": 1930
     },
     {
       "id": "clancy",
@@ -44,11 +38,11 @@
     },
     {
       "id": "herb",
-      "name": "Herbert Powell",
+      "name": "Herb Simpson",
       "gender": "male",
       "birthYear": 1949,
       "fatherId": "abe",
-      "motherId": "edwina"
+      "motherId": "mona"
     },
     {
       "id": "homer",
@@ -79,7 +73,7 @@
     },
     {
       "id": "marge",
-      "name": "Marge Simpson",
+      "name": "Marge Bouvier",
       "gender": "female",
       "birthYear": 1956,
       "fatherId": "clancy",
