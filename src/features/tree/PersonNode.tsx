@@ -1,13 +1,30 @@
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
+import { TIE_FRAME, type Tie } from "./palette";
 
 export type PersonData = {
   name: string;
   birthYear?: number;
   gender?: "male" | "female" | "other";
   isSelected?: boolean;
+  /** How this person is joined to whatever was clicked, if they are. */
+  tie?: Tie;
   /** A field is waiting for a card, so clicking this one fills it in. */
   isPicking?: boolean;
 };
+
+/**
+ * The one clicked, then the ones it is joined to, then everybody else.
+ *
+ * The clicked card stands up off the page as well as changing colour, so it is
+ * never the hue alone that tells it from the people it reaches.
+ */
+function frameOf(data: PersonData): string {
+  if (data.isSelected) {
+    return "scale-[1.06] border-blue-600 shadow-lg ring-2 ring-blue-500/30";
+  }
+
+  return data.tie ? TIE_FRAME[data.tie] : "border-slate-300";
+}
 
 export type PersonNodeType = Node<PersonData, "person">;
 
@@ -20,9 +37,9 @@ const ACCENT: Record<string, string> = {
 export function PersonNode({ data }: NodeProps<PersonNodeType>) {
   return (
     <div
-      className={`flex h-full w-full overflow-hidden rounded-lg border bg-white ${
+      className={`flex h-full w-full overflow-hidden rounded-lg border bg-white transition-transform ${
         data.isPicking ? "cursor-crosshair" : "cursor-pointer"
-      } ${data.isSelected ? "border-slate-900 ring-2 ring-slate-900/20" : "border-slate-300"}`}
+      } ${frameOf(data)}`}
     >
       <div className={`w-1 shrink-0 ${ACCENT[data.gender ?? ""] ?? "bg-slate-300"}`} />
 

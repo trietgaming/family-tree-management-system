@@ -19,6 +19,8 @@ type PersonPanelProps = {
   onSet: (field: PlainField, value: string | number | null) => void;
   onRename: (to: string) => void;
   onArm: (target: PickTarget | null) => void;
+  /** Move the canvas onto them, for when the panel is open and they are not. */
+  onFocus: () => void;
   onLink: (spouseId: string) => void;
   onUnlink: (spouseId: string) => void;
   onRemove: () => void;
@@ -33,7 +35,7 @@ const PARENTS = [
 ] as const;
 
 export function PersonPanel(props: PersonPanelProps) {
-  const { person, people, taken, picking, onSet, onRename, onArm } = props;
+  const { person, people, taken, picking, onSet, onRename, onArm, onFocus } = props;
   const { onLink, onUnlink, onRemove, onClose } = props;
 
   const byId = new Map(people.map((each) => [each.id, each]));
@@ -46,14 +48,25 @@ export function PersonPanel(props: PersonPanelProps) {
       <div className="flex items-start justify-between gap-2">
         <h2 className="min-w-0 truncate text-sm font-semibold text-slate-900">{person.name}</h2>
 
-        <button
-          type="button"
-          aria-label="Close"
-          onClick={onClose}
-          className="rounded px-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-        >
-          ×
-        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            onClick={onFocus}
+            title="Bring this person into view"
+            className="rounded-md border border-slate-300 px-1.5 py-0.5 text-xs text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
+          >
+            Focus
+          </button>
+
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="rounded px-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          >
+            ×
+          </button>
+        </div>
       </div>
 
       <Field label="Name">

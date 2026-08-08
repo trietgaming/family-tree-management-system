@@ -37,6 +37,8 @@ export default function App() {
   const [range, setRange] = useState<YearRange>(ANY_YEAR);
   const [picking, setPicking] = useState<PickTarget | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // One or the other: a click lands on a card or on a line, never on both.
+  const [lineId, setLineId] = useState<string | null>(null);
   // Separate from the selection: clicking a card should not move the canvas.
   const [view, setView] = useState<ViewRequest | null>(null);
   const result = useMemo(() => parseFamily(text), [text]);
@@ -102,6 +104,7 @@ export default function App() {
   const chooseCard = (id: string | null) => {
     if (picking === null) {
       setSelectedId(id);
+      setLineId(null);
       return;
     }
 
@@ -164,6 +167,13 @@ export default function App() {
         <FamilyTree
           family={drawn}
           selectedId={selectedId}
+          lineId={lineId}
+          onLine={(id) => {
+            // A line is about people, not a person, so no form opens for it.
+            setLineId(id);
+            setSelectedId(null);
+            setPicking(null);
+          }}
           view={view}
           dimmed={dimmed}
           range={range}
@@ -188,6 +198,7 @@ export default function App() {
             taken={taken}
             picking={picking}
             onArm={setPicking}
+            onFocus={() => revealPerson(selected.id)}
             onSet={(field, value) => setText(setField(text, selected.id, field, value))}
             onRename={(to) => {
               // The selection follows the person, not the name they went by.

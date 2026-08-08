@@ -333,6 +333,11 @@ and selected at once, so the form opens ready to name them.
 
 Two things move the canvas, and they turn out to be the same thing.
 
+The panel has a **Focus** button for the third case, which is a person whose
+form is open while they themselves are somewhere off the edge — after a picker
+sent the selection to somebody across the drawing, most often. It asks for the
+same reveal the other two do.
+
 Adding a person joined to nobody means the layout gives them a column of their
 own past everything else — on the fifty-seven person file, x=6704 of a drawing
 6880 wide, off screen at any zoom close enough to read. Loading an example is
@@ -362,6 +367,52 @@ Because the layer is text in and text out, it is checked without a browser: an
 edit, an add, a link and a delete run over each example and the result is parsed
 again. One round costs 2 ms on the fifty-seven person file, which is the whole
 of write, re-parse and re-layout.
+
+## Following a person
+
+Clicking a card lights the people it is joined to — parents, partners,
+children — and the lines that join them. Clicking a line lights the line and
+the people it names.
+
+Both are the same question asked from two ends, and the layout already answered
+it when it started saying who each line is about. A person's lines are exactly
+the lines naming them: their marriages, their lines down to their children, and
+the one their parents reach them by. The line to a sibling names the sibling,
+not them, so it stays dark. And the people to light follow from the lines
+rather than being worked out again — everybody a lit line names is somebody the
+click is joined to.
+
+Three ties, three colours, so the highlight says which way each relationship
+goes and not merely that there is one:
+
+| | |
+| --- | --- |
+| **orange** | up: the parents, and the line they reach the person by |
+| **green** | down: the children, and the lines down to them |
+| **purple** | across: the partners, married or not, and the lines between |
+
+Which way a line goes is read from the line. A descent line ending at the
+person clicked is the one their parents came down; any other descent line
+naming them is one of theirs going down to a child. The people on a line do not
+all share its tie: a line down to a child also names the other parent, who is a
+partner and coloured as one. Where somebody is two things at once — the
+documents here can do that — the closer tie wins, and birth is closer than
+marriage, the same order the rows are worked out in.
+
+Colour rather than weight: a thicker line among thin ones reads as heavy before
+it reads as chosen, and hue leaves the year filter its own channel, which is
+opacity. Purple because a card's own colours already spend blue, pink and
+violet on saying what somebody is. The card clicked stands up off the page as
+well as changing colour, so it is never hue alone that tells it from the people
+it reaches.
+
+A mark where lines meet takes the closest tie of everybody it stands for, and
+stays grey unless it stands for them all — so it never sits grey on a coloured
+line, or coloured on a grey one.
+
+Lit lines are drawn last, because an edge is drawn in the order it is given and
+a highlight under a neighbour is no highlight. A line is given a wider
+invisible band to be clicked on, since a one-pixel line is a one-pixel target.
 
 ## Filtering by year
 

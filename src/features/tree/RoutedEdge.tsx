@@ -16,5 +16,6 @@ export function RoutedEdge({ id, data, style }: EdgeProps<RoutedEdgeType>) {
 
   const path = points.map(({ x, y }, index) => `${index === 0 ? "M" : "L"} ${x},${y}`).join(" ");
 
-  return <BaseEdge id={id} path={path} style={style} />;
+  // Wider than it looks, or a one-pixel line would be a one-pixel target.
+  return <BaseEdge id={id} path={path} style={style} interactionWidth={16} />;
 }

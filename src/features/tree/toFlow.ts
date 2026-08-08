@@ -55,7 +55,7 @@ export function toFlow(family: Family | null): { nodes: Node[]; edges: Edge[] } 
     source: edge.source,
     target: edge.target,
     type: "routed",
-    data: { points: edge.points, people: edge.people },
+    data: { points: edge.points, people: edge.people, kind: edge.kind },
     // Dashed where the union was only inferred from a shared child, which is
     // the long-standing way of saying "together" without saying "married".
     style:
