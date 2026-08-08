@@ -45,7 +45,7 @@ export class Chart {
     this.placeColumns();
     this.findJoints();
 
-    this.router = new Router(this.marriages);
+    this.router = new Router(this.marriages, [...this.cards.values()]);
     this.router.run();
   }
 

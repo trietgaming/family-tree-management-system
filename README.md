@@ -414,6 +414,34 @@ absent value contradicts nothing, and *other* is not the opposite of anything.
 **Nodes cannot be dragged.** Positions are the layout's answer, and a card
 moved by hand would be a card in the wrong place with nothing to say so.
 
+**A handover steps back along its line when another one has its column.**
+Somebody in two pairings whose children both lie beyond them gets both
+handovers pushed onto their own column, and two lines then fall down it with
+nothing to tell them apart. Only a handover already pushed to the end of its
+line moves: it has given up on standing over its children, so stepping back
+along the line costs it nothing, while one still standing over them has
+something to lose and keeps it.
+
+**A long drop moves off the middle of its card when the middle is taken.** A
+partner standing a row above their marriage falls the whole depth of a band
+that is not theirs. Anything already running down that column — another
+pairing's handover, its line to a child — is then drawn twice over, and the two
+read as one line from the top of the first to the bottom of the last: a parent
+and child the document never claimed. Only these drops move, and only past what
+cannot: a card the run would fall through, and a run that does not start where
+this one starts. Runs that do start together are a card's stem and are read as
+one. The step is four pixels because the room usually is small — two cards
+standing side by side leave a corridor one gap wide, and that corridor is often
+the only way down.
+
+**A lane is searched for until one is free.** The band between two rows has
+room for a certain number of lines, and the search used to stop there and hand
+whatever was left a fixed lane. With one line overflowing that is harmless;
+with two it puts them at the same height, which is the one thing lanes exist to
+prevent. Crowding into the space below is the lesser fault — and the two kinds
+of lane can never collide, since marriage lanes count down from `rowY(r) + 86`
+and bars count up from `rowY(r) + 134`, eighteen at a time.
+
 **A bar hangs under its children, not under its parents.** Those are the same
 row almost always, and differ when a child is drawn more than one row down —
 married to somebody further along the line, most often. Hanging it under the

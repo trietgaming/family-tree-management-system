@@ -98,7 +98,7 @@
     },
     {
       "id": "h",
-      "name": "Other Child",
+      "name": "Other child",
       "gender": "male",
       "birthYear": 1950,
       "fatherId": "ah",
@@ -106,11 +106,19 @@
     },
     {
       "id": "i",
-      "name": "Other's Child",
+      "name": "Her second son",
       "gender": "male",
       "birthYear": 1967,
       "fatherId": "h",
       "motherId": "a"
+    },
+    {
+      "id": "j",
+      "name": "Their late child",
+      "gender": "female",
+      "birthYear": 1975,
+      "fatherId": "h",
+      "motherId": "c2"
     }
   ]
 }
