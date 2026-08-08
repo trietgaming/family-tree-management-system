@@ -1,3 +1,4 @@
+import { redo, undo } from "@codemirror/commands";
 import { json } from "@codemirror/lang-json";
 import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { forceLinting, linter, lintGutter, type Diagnostic } from "@codemirror/lint";
@@ -33,6 +34,24 @@ const theme = EditorView.theme({
   ".cm-scroller": { fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" },
   ".cm-gutters": { border: "none" },
 });
+
+/** Somewhere that answers these keys for itself: the editor, or any text box. */
+function hasItsOwnHistory(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+
+  return target.isContentEditable || ["INPUT", "TEXTAREA"].includes(target.tagName);
+}
+
+/** Ctrl on Windows, Cmd on a Mac, and both of the two spellings of redo. */
+function historyCommandFor(event: KeyboardEvent): typeof undo | null {
+  if (!(event.ctrlKey || event.metaKey) || event.altKey) return null;
+
+  const key = event.key.toLowerCase();
+  if (key === "z") return event.shiftKey ? redo : undo;
+  if (key === "y" && !event.shiftKey) return redo;
+
+  return null;
+}
 
 function toDiagnostics(state: EditorState, problems: Problem[]): Diagnostic[] {
   return problems.map((each) => {
@@ -104,6 +123,36 @@ export function JsonEditor({ value, problems, onChange }: JsonEditorProps) {
 
     editor.dispatch({ changes: { from: 0, to: current.length, insert: value } });
   }, [value]);
+
+  /**
+   * Undo from anywhere else on the page, answered here.
+   *
+   * There is one history and this editor holds it. Every change the diagram
+   * makes reaches the document, and reaches it as a transaction — so stepping
+   * back through this history steps back through the whole session, whichever
+   * half of the screen made the change. Undo on the canvas is therefore not a
+   * second history to keep in step with the first; it is the same one, reached
+   * from further away.
+   *
+   * That is also why the panel hides the editor rather than unmounting it: a
+   * history only exists while the view holding it does.
+   */
+  useEffect(() => {
+    const answer = (event: KeyboardEvent) => {
+      const editor = view.current;
+      if (!editor || hasItsOwnHistory(event.target)) return;
+
+      const command = historyCommandFor(event);
+      if (!command) return;
+
+      event.preventDefault();
+      command(editor);
+    };
+
+    window.addEventListener("keydown", answer);
+
+    return () => window.removeEventListener("keydown", answer);
+  }, []);
 
   // The linter reads the problems through a ref, so it has to be told when
   // they change rather than waiting for the next edit.
