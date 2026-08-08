@@ -6,7 +6,7 @@ but the code in this folder.
 
 **Live at https://trietgaming.github.io/family-tree-management-system/** — no
 sign in, nothing to set up. It opens on the Simpsons; the picker above the
-editor has thirteen more families, each one chosen to break something.
+editor has twelve more families, each one chosen to break something.
 
 # Libraries, tools and frameworks
 
@@ -115,8 +115,9 @@ a child has two parents and nesting can only express one.
 }
 ```
 
-Only `id` and `name` are required. `examples/` holds nine families to paste in,
-each one chosen to break something; `examples/README.md` says what each breaks.
+Only `id` and `name` are required. `examples/` holds thirteen families to paste
+in, each one chosen to break something; `examples/README.md` says what each
+breaks.
 
 ## Siblings are worked out, not written down
 
