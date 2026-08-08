@@ -1,4 +1,4 @@
-import type { Person } from "./schema";
+import type { PersonRecord } from "./schema";
 
 /** Either end may be left open, and both open means no filter at all. */
 export type YearRange = { from: number | null; to: number | null };
@@ -23,7 +23,7 @@ export function isRangeSet(range: YearRange): boolean {
  * absence of evidence, and the same reading validation gives it: what is not
  * recorded contradicts nothing.
  */
-export function isWithinRange(person: Person, range: YearRange): boolean {
+export function isWithinRange(person: PersonRecord, range: YearRange): boolean {
   if (person.birthYear === undefined) return true;
 
   return (
@@ -33,7 +33,7 @@ export function isWithinRange(person: Person, range: YearRange): boolean {
 }
 
 /** Who the filter pushes into the background. Empty while nothing is asked for. */
-export function findOutsideRange(people: Person[], range: YearRange): Set<string> {
+export function findOutsideRange(people: PersonRecord[], range: YearRange): Set<string> {
   if (!isRangeSet(range)) return new Set();
 
   return new Set(

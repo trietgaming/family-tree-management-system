@@ -36,14 +36,16 @@ export class Router {
   private readonly marriages: Marriage[];
   /** Every card, because a line has to get past the ones it does not belong to. */
   private readonly cards: Card[];
-  /** Where a partner's drop leaves its card, when the middle of it is taken. */
-  private readonly drops = new Map<string, number>();
   readonly routes: Route[] = [];
   readonly junctions: Junction[] = [];
 
-  constructor(marriages: Marriage[], cards: Card[]) {
+  private constructor(marriages: Marriage[], cards: Card[]) {
     this.marriages = marriages;
     this.cards = cards;
+  }
+
+  static over(marriages: Marriage[], cards: Card[]): Router {
+    return new Router(marriages, cards);
   }
 
   run(): void {
@@ -214,10 +216,7 @@ export class Router {
         const run = heightOf(card.foot, marriage.lineY);
         const towards = Math.sign(marriage.jointX - card.x) || 1;
 
-        this.drops.set(
-          dropKey(marriage, card),
-          findFreeColumn(card, run, towards, this.cards, fixed),
-        );
+        marriage.noteDrop(card, findFreeColumn(card, run, towards, this.cards, fixed));
       }
     }
   }
@@ -232,7 +231,7 @@ export class Router {
       const [left, right] = [marriage.leftPartner, marriage.rightPartner];
 
       routes.push({
-        id: `${left.id}~${right.id}`,
+        id: `${left.person.id}~${right.person.id}`,
         marriage,
         kind: "marriage",
         from: left,
@@ -244,10 +243,10 @@ export class Router {
       });
     } else if (marriage.isCouple) {
       for (const card of marriage.partners) {
-        const at = this.drops.get(dropKey(marriage, card)) ?? card.x;
+        const at = marriage.dropOf(card);
 
         routes.push({
-          id: `${card.id}->${marriage.id}`,
+          id: `${card.person.id}->${marriage.id}`,
           marriage,
           kind: "marriage",
           from: card,
@@ -265,7 +264,7 @@ export class Router {
 
     for (const child of marriage.children) {
       routes.push({
-        id: `${marriage.id}->${child.id}`,
+        id: `${marriage.id}->${child.person.id}`,
         marriage,
         kind: "child",
         from: null,
@@ -296,7 +295,7 @@ export class Router {
     const found: Junction[] = [];
 
     // Where the drop leaves the line the two partners share.
-    const people = marriage.peopleIds;
+    const people = marriage.people;
 
     if (marriage.isCouple) {
       found.push({ id: `${marriage.id}@marriage`, x: jointX, y: lineY, on: "marriage", people });
@@ -346,10 +345,6 @@ function atEndOf(x: number, span: Span): number {
   if (x >= span.right - 0.5) return -1;
 
   return 0;
-}
-
-function dropKey(marriage: Marriage, card: Card): string {
-  return `${marriage.id}:${card.id}`;
 }
 
 /** How near two parallel runs may come before they read as one. */

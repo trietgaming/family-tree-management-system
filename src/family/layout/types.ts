@@ -1,6 +1,10 @@
+import type { Person } from "../model";
+
 export type LayoutNode = {
   id: string;
   kind: "person" | "union";
+  /** Who is drawn on it. Null on a joint, which is a place rather than somebody. */
+  person: Person | null;
   x: number;
   y: number;
   width: number;
@@ -20,7 +24,7 @@ export type LayoutEdge = {
    * Everyone this line joins. `source` and `target` do not say: either can be
    * a union, which is a joint rather than a person.
    */
-  people: string[];
+  people: Person[];
   /** The line itself. The only description of it there is. */
   points: Point[];
 };
@@ -35,13 +39,12 @@ export type Junction = {
   y: number;
   on: "marriage" | "descent";
   /** Everyone whose lines meet here. */
-  people: string[];
+  people: Person[];
 };
 
 export type Layout = {
   nodes: LayoutNode[];
   edges: LayoutEdge[];
   junctions: Junction[];
-  generations: Map<string, number>;
 };
 

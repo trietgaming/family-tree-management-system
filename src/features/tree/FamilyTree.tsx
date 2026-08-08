@@ -11,7 +11,7 @@ import {
   type Edge,
 } from "@xyflow/react";
 import { useEffect, useMemo, useRef } from "react";
-import type { Family } from "../../family/schema";
+import type { FamilyDocument } from "../../family/schema";
 import type { YearRange } from "../../family/years";
 import { AddPerson } from "./AddPerson";
 import { RoutedEdge } from "./RoutedEdge";
@@ -122,7 +122,7 @@ function tieOfMark(about: string[], ties: Ties, selectedId: string | null): Tie 
 }
 
 type FamilyTreeProps = {
-  family: Family | null;
+  family: FamilyDocument | null;
   selectedId: string | null;
   /** Where the view should go next. Clicking a card is deliberately not this. */
   view: ViewRequest | null;

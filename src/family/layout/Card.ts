@@ -1,4 +1,4 @@
-import type { Person } from "../schema";
+import type { Person } from "../model";
 import { PERSON_HEIGHT, PERSON_WIDTH, rowY } from "./geometry";
 
 /** One person's box. Its row is known from the start; its column is placed later. */
@@ -9,13 +9,13 @@ export class Card {
   /** The centre. Written once, by `Block.commit`. */
   x = 0;
 
-  constructor(person: Person, row: number) {
+  private constructor(person: Person, row: number) {
     this.person = person;
     this.row = row;
   }
 
-  get id(): string {
-    return this.person.id;
+  static forPerson(person: Person, row: number): Card {
+    return new Card(person, row);
   }
 
   get y(): number {

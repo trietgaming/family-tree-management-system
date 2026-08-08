@@ -1,7 +1,7 @@
-import { isDeclaredUnion, parentIdsOf, type FamilyModel, type Union } from "../model";
+import type { Person, PersonRepository, Union } from "../model";
 import { Block, type Placement } from "./Block";
 import { Card } from "./Card";
-import { assignGenerations } from "./generations";
+import { Generations } from "./generations";
 import {
   CARD_STEP,
   PERSON_HEIGHT,
@@ -25,18 +25,18 @@ import type { Layout, LayoutEdge, LayoutNode } from "./types";
  * of operations for a caller to get wrong.
  */
 export class Chart {
-  private readonly model: FamilyModel;
-  private readonly cards = new Map<string, Card>();
+  private readonly repo: PersonRepository;
+  private readonly cards = new Map<Person, Card>();
   private readonly roots: Household[] = [];
   private readonly marriages: Marriage[] = [];
   private readonly router: Router;
 
-  constructor(model: FamilyModel) {
-    this.model = model;
+  private constructor(repo: PersonRepository) {
+    this.repo = repo;
 
-    const rows = assignGenerations(model);
-    for (const person of model.order) {
-      this.cards.set(person.id, new Card(person, rows.get(person.id) ?? 0));
+    const rows = Generations.of(repo);
+    for (const person of repo.all) {
+      this.cards.set(person, Card.forPerson(person, rows.rowOf(person)));
     }
 
     this.grow();
@@ -45,8 +45,12 @@ export class Chart {
     this.placeColumns();
     this.findJoints();
 
-    this.router = new Router(this.marriages, [...this.cards.values()]);
+    this.router = Router.over(this.marriages, [...this.cards.values()]);
     this.router.run();
+  }
+
+  static of(repo: PersonRepository): Chart {
+    return new Chart(repo);
   }
 
   /**
@@ -60,16 +64,14 @@ export class Chart {
    * for, and is seated wherever they are first reached.
    */
   private isSeatEarned(union: Union, other: Card): boolean {
-    if (isDeclaredUnion(this.model, union)) return true;
+    if (union.isDeclared) return true;
 
-    return !(this.model.unionsOf.get(other.id) ?? []).some((each) =>
-      isDeclaredUnion(this.model, each),
-    );
+    return !other.person.unions.some((each) => each.isDeclared);
   }
 
-  private cardOf(id: string): Card {
-    const card = this.cards.get(id);
-    if (!card) throw new Error(`No card for "${id}"`);
+  private cardOf(person: Person): Card {
+    const card = this.cards.get(person);
+    if (!card) throw new Error(`No card for "${person.id}"`);
 
     return card;
   }
@@ -83,54 +85,54 @@ export class Chart {
    * every joint can sit exactly above its own children.
    */
   private grow(): void {
-    const placed = new Set<string>();
+    const placed = new Set<Person>();
     // Across every household, not just this one: a pairing whose two partners
     // end up in different houses would otherwise be built once by each.
-    const drawn = new Set<string>();
+    const drawn = new Set<Union>();
 
-    const build = (personId: string): Household => {
-      placed.add(personId);
+    const build = (person: Person): Household => {
+      placed.add(person);
 
-      const house = new Household(this.cardOf(personId));
-      const household = [personId];
+      const house = Household.headedBy(this.cardOf(person));
+      const household = [person];
 
       // A spouse brings their own other marriages into this house with them.
       for (let i = 0; i < household.length; i++) {
         const here = this.cardOf(household[i]);
 
-        for (const union of this.model.unionsOf.get(here.id) ?? []) {
-          if (drawn.has(union.id)) continue;
-          drawn.add(union.id);
+        for (const union of here.person.unions) {
+          if (drawn.has(union)) continue;
+          drawn.add(union);
 
-          const otherId = union.partnerIds.find((id) => id !== here.id);
-          const other = otherId === undefined ? null : this.cardOf(otherId);
+          const beside = union.partnerBesides(here.person);
+          const other = beside === null ? null : this.cardOf(beside);
 
           // Only a partner on the same row can stand beside them. One on
           // another row keeps their own home, and the pairing is drawn as a
           // link between the two rows.
           const isSeatOffered =
             other !== null &&
-            !placed.has(other.id) &&
+            !placed.has(other.person) &&
             other.row === here.row &&
             this.isSeatEarned(union, other);
 
           const spouse = isSeatOffered ? other : null;
 
           if (spouse !== null) {
-            placed.add(spouse.id);
-            household.push(spouse.id);
+            placed.add(spouse.person);
+            household.push(spouse.person);
           }
 
           // Claim the children before recursing, so a sibling cannot be pulled
           // away and drawn as somebody's spouse instead.
-          const mine = union.childIds.filter((id) => !placed.has(id));
-          for (const id of mine) placed.add(id);
+          const mine = union.children.filter((child) => !placed.has(child));
+          for (const child of mine) placed.add(child);
 
-          const marriage = new Marriage(
+          const marriage = Marriage.of(
             union,
-            union.partnerIds.map((id) => this.cardOf(id)),
+            union.partners.map((partner) => this.cardOf(partner)),
             spouse,
-            union.childIds.map((id) => this.cardOf(id)),
+            union.children.map((child) => this.cardOf(child)),
             mine.map(build),
           );
 
@@ -142,14 +144,14 @@ export class Chart {
       return house;
     };
 
-    for (const person of this.model.order) {
-      if (placed.has(person.id) || this.model.bornInto.has(person.id)) continue;
-      this.roots.push(build(person.id));
+    for (const person of this.repo.all) {
+      if (placed.has(person) || person.bornInto !== null) continue;
+      this.roots.push(build(person));
     }
 
     // Anything still unplaced is disconnected from every root; give it its own.
-    for (const person of this.model.order) {
-      if (!placed.has(person.id)) this.roots.push(build(person.id));
+    for (const person of this.repo.all) {
+      if (!placed.has(person)) this.roots.push(build(person));
     }
   }
 
@@ -160,16 +162,16 @@ export class Chart {
    * from, which is what sorting by lean arranges.
    */
   private leanBranches(): void {
-    const home = new Map<string, number>();
+    const home = new Map<Person, number>();
     this.roots.forEach((root, index) => {
-      for (const card of root.cards) home.set(card.id, index);
+      for (const card of root.cards) home.set(card.person, index);
     });
 
     const leanOf = (house: Household, from: number): number => {
       const elsewhere = house.descendants
         .flatMap((each) => each.cards)
-        .flatMap((card) => parentIdsOf(this.model, card.id))
-        .map((parentId) => home.get(parentId))
+        .flatMap((card) => card.person.parents)
+        .map((parent) => home.get(parent))
         .filter((index): index is number => index !== undefined && index !== from);
 
       const average = mean(elsewhere);
@@ -196,8 +198,8 @@ export class Chart {
    * with several stands in the middle, so every joint has a partner beside it.
    */
   private fillRows(): void {
-    const order = new Map(this.model.order.map((person, index) => [person.id, index]));
-    const at = (card: Card) => order.get(card.id) ?? 0;
+    const order = new Map(this.repo.all.map((person, index) => [person, index]));
+    const at = (card: Card) => order.get(card.person) ?? 0;
 
     for (const root of this.roots) {
       for (const house of root.descendants) {
@@ -228,7 +230,7 @@ export class Chart {
   private placeColumns(): void {
     /** Row, and the stretches of it already spoken for. */
     const taken = new Map<number, Span[]>();
-    const settled = new Map<string, Card>();
+    const settled = new Map<Person, Card>();
     let after = 0;
 
     for (const root of this.roots) {
@@ -243,7 +245,7 @@ export class Chart {
 
       for (const { card } of held) {
         taken.set(card.row, [...(taken.get(card.row) ?? []), { left: card.left, right: card.right }]);
-        settled.set(card.id, card);
+        settled.set(card.person, card);
         after = Math.max(after, card.right + TREE_GAP);
       }
     }
@@ -255,13 +257,11 @@ export class Chart {
   }
 
   /** Everyone this person is drawn joined to: parents, partners, children. */
-  private kinOf(personId: string): string[] {
-    const unions = this.model.unionsOf.get(personId) ?? [];
-
+  private kinOf(person: Person): Person[] {
     return [
-      ...parentIdsOf(this.model, personId),
-      ...unions.flatMap((union) => [...union.partnerIds, ...union.childIds]),
-    ].filter((id) => id !== personId);
+      ...person.parents,
+      ...person.unions.flatMap((union) => [...union.partners, ...union.children]),
+    ].filter((each) => each !== person);
   }
 
   /**
@@ -270,10 +270,10 @@ export class Chart {
    * back to the tree's own left edge. Null when it is joined to nothing drawn
    * yet, which is every tree that stands on its own.
    */
-  private pullOf(held: Placement[], settled: Map<string, Card>): number | null {
+  private pullOf(held: Placement[], settled: Map<Person, Card>): number | null {
     const wishes = held.flatMap(({ card, dx }) =>
-      this.kinOf(card.id)
-        .map((id) => settled.get(id))
+      this.kinOf(card.person)
+        .map((kin) => settled.get(kin))
         .filter((other): other is Card => other !== undefined)
         .map((other) => other.x - dx),
     );
@@ -363,12 +363,13 @@ export class Chart {
   }
 
   toLayout(): Layout {
-    const nodes: LayoutNode[] = this.model.order.map((person) => {
-      const card = this.cardOf(person.id);
+    const nodes: LayoutNode[] = this.repo.all.map((person) => {
+      const card = this.cardOf(person);
 
       return {
-        id: card.id,
+        id: person.id.value,
         kind: "person",
+        person,
         x: card.left,
         y: card.y,
         width: PERSON_WIDTH,
@@ -380,6 +381,7 @@ export class Chart {
       nodes.push({
         id: marriage.id,
         kind: "union",
+        person: null,
         x: marriage.jointX - UNION_SIZE / 2,
         y: marriage.lineY - UNION_SIZE / 2,
         width: UNION_SIZE,
@@ -389,26 +391,21 @@ export class Chart {
 
     const edges: LayoutEdge[] = this.router.routes.map((route) => ({
       id: route.id,
-      source: route.from?.id ?? route.marriage.id,
-      target: route.to?.id ?? route.marriage.id,
+      source: route.from?.person.id.value ?? route.marriage.id,
+      target: route.to?.person.id.value ?? route.marriage.id,
       kind: route.kind,
       declared: route.kind === "marriage" ? route.marriage.isDeclared : undefined,
       // The partners, and the child this run ends at when it ends at one.
       people: [
         ...new Set([
-          ...route.marriage.partners.map((card) => card.id),
-          ...(route.to ? [route.to.id] : []),
+          ...route.marriage.partners.map((card) => card.person),
+          ...(route.to ? [route.to.person] : []),
         ]),
       ],
       points: route.points,
     }));
 
-    return {
-      nodes,
-      edges,
-      junctions: this.router.junctions,
-      generations: new Map([...this.cards].map(([id, card]) => [id, card.row])),
-    };
+    return { nodes, edges, junctions: this.router.junctions };
   }
 }
 

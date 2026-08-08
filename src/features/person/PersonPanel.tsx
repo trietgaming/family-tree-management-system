@@ -1,5 +1,5 @@
 import type { PlainField } from "../../family/edit";
-import { NEEDS_NAME, type Person } from "../../family/schema";
+import { NEEDS_NAME, type PersonRecord } from "../../family/schema";
 import { yearFrom } from "../../family/years";
 import { DraftField } from "./DraftField";
 import { Field, inputStyle } from "./Field";
@@ -11,8 +11,8 @@ import { candidatesFor } from "./kin";
 import { PICK_LABEL, type PickTarget } from "./picking";
 
 type PersonPanelProps = {
-  person: Person;
-  people: Person[];
+  person: PersonRecord;
+  people: PersonRecord[];
   /** Every id in the document, including the ones the schema rejected. */
   taken: string[];
   /** The field waiting for a card to be clicked, if any. */

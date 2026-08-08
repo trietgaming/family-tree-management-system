@@ -1,4 +1,4 @@
-import type { FamilyModel } from "../model";
+import type { PersonRepository } from "../model";
 import { Chart } from "./Chart";
 import type { Layout } from "./types";
 
@@ -13,6 +13,6 @@ export type { Junction, Layout, LayoutEdge, LayoutNode, Point } from "./types";
  * page for the router to decide where the lines run, and which of their
  * meetings are real.
  */
-export function layout(model: FamilyModel): Layout {
-  return new Chart(model).toLayout();
+export function layout(repo: PersonRepository): Layout {
+  return Chart.of(repo).toLayout();
 }

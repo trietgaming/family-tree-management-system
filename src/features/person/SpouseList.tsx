@@ -1,4 +1,4 @@
-import type { Person } from "../../family/schema";
+import type { PersonRecord } from "../../family/schema";
 import { PersonSelect } from "./PersonSelect";
 import { PickButton } from "./PickButton";
 import { labelOf } from "./kin";
@@ -6,9 +6,9 @@ import { PICK_LABEL } from "./picking";
 
 type SpouseListProps = {
   spouseIds: string[];
-  byId: Map<string, Person>;
+  byId: Map<string, PersonRecord>;
   /** Everybody who could be added, minus the ones already here. */
-  candidates: Person[];
+  candidates: PersonRecord[];
   isArmed: boolean;
   onArm: () => void;
   onLink: (id: string) => void;
@@ -31,7 +31,7 @@ export function SpouseList(props: SpouseListProps) {
           className="flex items-center justify-between rounded-md bg-slate-100 py-1 pr-1 pl-2.5"
         >
           <span className="truncate text-sm text-slate-700">
-            {byId.has(id) ? labelOf(byId.get(id) as Person) : id}
+            {byId.has(id) ? labelOf(byId.get(id) as PersonRecord) : id}
           </span>
 
           <button

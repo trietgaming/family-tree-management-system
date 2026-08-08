@@ -30,5 +30,14 @@ export const familySchema = z.object({
   people: z.array(personSchema).min(1, "A family needs at least one person"),
 });
 
-export type Person = z.infer<typeof personSchema>;
-export type Family = z.infer<typeof familySchema>;
+/**
+ * What the document says, not what it means.
+ *
+ * These are records: flat, full of ids, and exactly as trustworthy as the text
+ * they came from. `Person` and the rest of the domain are built from them by
+ * the repository, and nothing past that boundary should be reading a record.
+ */
+export type PersonRecord = z.infer<typeof personSchema>;
+export type FamilyDocument = z.infer<typeof familySchema>;
+
+export type Gender = NonNullable<PersonRecord["gender"]>;

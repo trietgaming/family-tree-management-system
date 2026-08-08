@@ -14,8 +14,12 @@ export class Household {
   /** The cards on this household's own row, left to right. Set once ordered. */
   row: Card[] = [];
 
-  constructor(head: Card) {
+  private constructor(head: Card) {
     this.head = head;
+  }
+
+  static headedBy(head: Card): Household {
+    return new Household(head);
   }
 
   get spouses(): Card[] {

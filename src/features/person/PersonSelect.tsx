@@ -1,10 +1,10 @@
-import type { Person } from "../../family/schema";
+import type { PersonRecord } from "../../family/schema";
 import { inputStyle } from "./Field";
 import { labelOf } from "./kin";
 
 type PersonSelectProps = {
   value: string | null | undefined;
-  people: Person[];
+  people: PersonRecord[];
   /** Shown for the empty choice, which every parent is allowed to be. */
   blank: string;
   onChange: (id: string | null) => void;

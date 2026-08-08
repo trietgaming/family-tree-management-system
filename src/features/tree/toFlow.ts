@@ -1,19 +1,21 @@
 import type { Edge, Node } from "@xyflow/react";
 import { layout } from "../../family/layout";
-import { buildModel } from "../../family/model";
-import type { Family } from "../../family/schema";
+import { PersonRepository, type Person } from "../../family/model";
+import type { FamilyDocument } from "../../family/schema";
 import { DASH, DESCENT, DOT, MARRIAGE } from "./palette";
 
 /**
  * The layout decides everything; this only says it in React Flow's words.
  * Keeping the translation out of the component is what lets the layout be
  * checked without a browser.
+ *
+ * This is also where people turn back into ids. React Flow keys everything by
+ * string, so the boundary has to be somewhere, and here is as late as it gets.
  */
-export function toFlow(family: Family | null): { nodes: Node[]; edges: Edge[] } {
-  if (!family) return { nodes: [], edges: [] };
+export function toFlow(document: FamilyDocument | null): { nodes: Node[]; edges: Edge[] } {
+  if (!document) return { nodes: [], edges: [] };
 
-  const model = buildModel(family);
-  const drawn = layout(model);
+  const drawn = layout(PersonRepository.of(document));
 
   const nodes: Node[] = drawn.nodes.map((node) => ({
     id: node.id,
@@ -25,14 +27,7 @@ export function toFlow(family: Family | null): { nodes: Node[]; edges: Edge[] } 
     height: node.height,
     // Positions come from the layout, so dragging one would only lie about it.
     draggable: false,
-    data:
-      node.kind === "person"
-        ? {
-            name: model.byId.get(node.id)?.name ?? node.id,
-            birthYear: model.byId.get(node.id)?.birthYear,
-            gender: model.byId.get(node.id)?.gender,
-          }
-        : {},
+    data: node.person === null ? {} : personDataOf(node.person),
   }));
 
   // Added after the people so they sit on top of the lines rather than under.
@@ -46,7 +41,7 @@ export function toFlow(family: Family | null): { nodes: Node[]; edges: Edge[] } 
       draggable: false,
       selectable: false,
       focusable: false,
-      data: { on: junction.on, people: junction.people },
+      data: { on: junction.on, people: idsOf(junction.people) },
     })),
   );
 
@@ -55,7 +50,7 @@ export function toFlow(family: Family | null): { nodes: Node[]; edges: Edge[] } 
     source: edge.source,
     target: edge.target,
     type: "routed",
-    data: { points: edge.points, people: edge.people, kind: edge.kind },
+    data: { points: edge.points, people: idsOf(edge.people), kind: edge.kind },
     // Dashed where the union was only inferred from a shared child, which is
     // the long-standing way of saying "together" without saying "married".
     style:
@@ -69,4 +64,12 @@ export function toFlow(family: Family | null): { nodes: Node[]; edges: Edge[] } 
   }));
 
   return { nodes, edges };
+}
+
+function personDataOf(person: Person) {
+  return { name: person.name, birthYear: person.birthYear, gender: person.gender };
+}
+
+function idsOf(people: Person[]): string[] {
+  return people.map((person) => person.id.value);
 }

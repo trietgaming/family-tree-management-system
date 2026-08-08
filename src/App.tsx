@@ -10,7 +10,7 @@ import {
   unlinkSpouses,
 } from "./family/edit";
 import { parseFamily } from "./family/parse";
-import type { Family } from "./family/schema";
+import type { FamilyDocument } from "./family/schema";
 import { ANY_YEAR, findOutsideRange, type YearRange } from "./family/years";
 import { JsonPanel } from "./features/editor/JsonPanel";
 import { candidatesFor } from "./features/person/kin";
@@ -69,7 +69,7 @@ export default function App() {
    * view is made in the same breath as the change it is about — it would arrive
    * ahead of the drawing it means, and be answered against the one before.
    */
-  const [drawn, setDrawn] = useState<Family | null>(result.ok ? result.family : null);
+  const [drawn, setDrawn] = useState<FamilyDocument | null>(result.ok ? result.family : null);
   const [read, setRead] = useState(result);
   if (read !== result) {
     setRead(result);

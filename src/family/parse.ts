@@ -1,8 +1,8 @@
-import { familySchema, type Family } from "./schema";
+import { familySchema, type FamilyDocument } from "./schema";
 import { findProblems, errorAt, type Problem } from "./validate";
 
 export type ParseResult =
-  | { ok: true; family: Family; problems: Problem[] }
+  | { ok: true; family: FamilyDocument; problems: Problem[] }
   | { ok: false; problems: Problem[] };
 
 /**

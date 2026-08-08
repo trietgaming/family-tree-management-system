@@ -1,4 +1,4 @@
-import type { Family, Person } from "./schema";
+import type { FamilyDocument, PersonRecord } from "./schema";
 
 export type Problem = {
   /** Where in the document, as `people[3].fatherId`. Empty for the document as a whole. */
@@ -44,7 +44,7 @@ export function warningAt(segments: readonly PropertyKey[], message: string): Pr
  * Everything the schema cannot see, because it needs the whole graph rather
  * than one field at a time. An empty result means the family holds together.
  */
-export function findProblems(family: Family): Problem[] {
+export function findProblems(family: FamilyDocument): Problem[] {
   const { people } = family;
   const byId = indexById(people);
 
@@ -60,7 +60,7 @@ export function findProblems(family: Family): Problem[] {
 }
 
 /** What the roles say about a parent, against what the parent's record says. */
-function findMismatchedParents(people: Person[], byId: Map<string, Person>): Problem[] {
+function findMismatchedParents(people: PersonRecord[], byId: Map<string, PersonRecord>): Problem[] {
   const problems: Problem[] = [];
 
   people.forEach((person, index) => {
@@ -93,7 +93,7 @@ function findMismatchedParents(people: Person[], byId: Map<string, Person>): Pro
   return problems;
 }
 
-function findUnlikelyYears(people: Person[], byId: Map<string, Person>): Problem[] {
+function findUnlikelyYears(people: PersonRecord[], byId: Map<string, PersonRecord>): Problem[] {
   const problems: Problem[] = [];
   const thisYear = new Date().getFullYear();
 
@@ -132,7 +132,7 @@ function findUnlikelyYears(people: Person[], byId: Map<string, Person>): Problem
  * line is only drawn as a marriage when both say so — so a listing that goes
  * one way quietly turns into something weaker than intended.
  */
-function findOneSidedMarriages(people: Person[], byId: Map<string, Person>): Problem[] {
+function findOneSidedMarriages(people: PersonRecord[], byId: Map<string, PersonRecord>): Problem[] {
   const problems: Problem[] = [];
 
   people.forEach((person, index) => {
@@ -154,8 +154,8 @@ function findOneSidedMarriages(people: Person[], byId: Map<string, Person>): Pro
 }
 
 /** First occurrence wins, so every other check sees one person per id. */
-function indexById(people: Person[]): Map<string, Person> {
-  const byId = new Map<string, Person>();
+function indexById(people: PersonRecord[]): Map<string, PersonRecord> {
+  const byId = new Map<string, PersonRecord>();
 
   for (const person of people) {
     if (!byId.has(person.id)) byId.set(person.id, person);
@@ -164,7 +164,7 @@ function indexById(people: Person[]): Map<string, Person> {
   return byId;
 }
 
-function parentIdsOf(person: Person): string[] {
+function parentIdsOf(person: PersonRecord): string[] {
   return PARENT_FIELDS.map((field) => person[field]).filter((id): id is string => Boolean(id));
 }
 
@@ -172,7 +172,7 @@ function unknownIdMessage(id: string): string {
   return `No person has the id "${id}"`;
 }
 
-function findDuplicateIds(people: Person[]): Problem[] {
+function findDuplicateIds(people: PersonRecord[]): Problem[] {
   const seen = new Set<string>();
 
   return people.flatMap((person, index) => {
@@ -185,7 +185,7 @@ function findDuplicateIds(people: Person[]): Problem[] {
   });
 }
 
-function findBrokenReferences(people: Person[], byId: Map<string, Person>): Problem[] {
+function findBrokenReferences(people: PersonRecord[], byId: Map<string, PersonRecord>): Problem[] {
   const problems: Problem[] = [];
 
   people.forEach((person, index) => {
@@ -227,7 +227,7 @@ function findBrokenReferences(people: Person[], byId: Map<string, Person>): Prob
  * refused here rather than left to hang a tab. Only the first one is reported:
  * the others are usually the same loop entered from somewhere else.
  */
-function findAncestryLoops(byId: Map<string, Person>): Problem[] {
+function findAncestryLoops(byId: Map<string, PersonRecord>): Problem[] {
   const acyclic = new Set<string>();
 
   for (const id of byId.keys()) {
@@ -253,7 +253,7 @@ function findAncestryLoops(byId: Map<string, Person>): Problem[] {
  */
 function findLoopAbove(
   id: string,
-  byId: Map<string, Person>,
+  byId: Map<string, PersonRecord>,
   trail: string[],
   acyclic: Set<string>,
 ): string[] | null {
@@ -282,7 +282,7 @@ function findLoopAbove(
  * brief names the field. The parents win, and a contradiction is reported
  * rather than quietly resolved.
  */
-function findContradictorySiblings(people: Person[], byId: Map<string, Person>): Problem[] {
+function findContradictorySiblings(people: PersonRecord[], byId: Map<string, PersonRecord>): Problem[] {
   const problems: Problem[] = [];
 
   people.forEach((person, index) => {
