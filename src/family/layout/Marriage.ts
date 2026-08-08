@@ -53,6 +53,11 @@ export class Marriage {
     return Math.abs(a.x - b.x) <= PERSON_WIDTH + PARTNER_GAP + 2;
   }
 
+  /** Everyone this pairing is about, which is what its lines and marks join. */
+  get peopleIds(): string[] {
+    return [...this.partners, ...this.children].map((card) => card.id);
+  }
+
   get seats(): number[] {
     return this.partners.map((card) => card.x);
   }

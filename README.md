@@ -304,6 +304,25 @@ Five rules the form follows:
   at the last document that held together, and a picker able to freeze the page
   is a picker offering the wrong thing.
 
+### Picking from the canvas
+
+A dropdown of fifty-seven names is a poor way to say *that one, there*, when
+that one is on screen already. So each of Father, Mother and the spouse list
+has a picker beside it: arm the field, then click a card.
+
+A picker per field rather than one mode for the whole form, because what is
+being armed is *which* field, and a control that says so is one fewer thing to
+remember. While a field is armed the panel says what the canvas is waiting for,
+the cards take a crosshair, and Escape or Cancel calls it off.
+
+Arming changes what a click on a card means, and that decision is made in one
+place: the canvas only ever reports that somebody was clicked, and the app
+decides whether that opens them or fills a field. A pick is only accepted from
+somebody the dropdown would have offered — the pickers leave out a person's own
+line for a reason, and a click must not be a way around it. A refused pick
+leaves the field armed, because there was no way to say no to it and so it has
+not been used up.
+
 While the document does not parse there is nothing safe to write back over, so
 the form steps aside until it does, and **Add person** on the canvas greys out
 with it. That button sits on the canvas rather than beside the JSON because the
@@ -344,6 +363,29 @@ edit, an add, a link and a delete run over each example and the result is parsed
 again. One round costs 2 ms on the fifty-seven person file, which is the whole
 of write, re-parse and re-layout.
 
+## Filtering by year
+
+*Show people born from … to …*, in two boxes either of which may be left
+empty — a slider would have to invent both ends before it could be dragged, and
+*born before 1900* is a question with only one. Nobody is removed: people
+outside the range fade to a fifth, which
+keeps the shape of the family intact. Hiding a person in the middle would cut
+the tree in two and say something the document does not.
+
+The rule reaches past the cards. **A line or a dot fades when everybody it is
+about is outside the range** — one still leading to somebody in view is worth
+following, so it stays. That needed the layout to say who each line joins,
+because `source` and `target` cannot: either of them may be a union, which is a
+joint rather than a person. So `LayoutEdge` and `Junction` now carry the people
+they are about, which the router knew all along and used to throw away.
+
+Fading is applied over the finished drawing rather than inside it, so changing
+the range never re-runs the layout.
+
+**Somebody with no year recorded never fades.** An absent year is not evidence
+of being born elsewhere in time; it is the absence of evidence, and the same
+reading validation gives it.
+
 ## Between visits
 
 The document is kept in `localStorage` and comes back on reload. It is written
@@ -371,6 +413,13 @@ absent value contradicts nothing, and *other* is not the opposite of anything.
 
 **Nodes cannot be dragged.** Positions are the layout's answer, and a card
 moved by hand would be a card in the wrong place with nothing to say so.
+
+**A bar hangs under its children, not under its parents.** Those are the same
+row almost always, and differ when a child is drawn more than one row down —
+married to somebody further along the line, most often. Hanging it under the
+parents there leaves the drop to that child crossing every row between, and any
+card standing in the way; the drawing then says the card it passes behind is
+the parent, which is not what the document says.
 
 **Long links are accepted, not hidden.** Where a person is drawn beside their
 spouse, the line to their own parents crosses the drawing. Genealogy software

@@ -11,14 +11,17 @@ import {
 } from "@xyflow/react";
 import { useEffect, useMemo, useRef } from "react";
 import type { Family } from "../../family/schema";
+import type { YearRange } from "../../family/years";
 import { AddPerson } from "./AddPerson";
 import { RoutedEdge } from "./RoutedEdge";
 import { JunctionNode } from "./JunctionNode";
 import { Legend } from "./Legend";
+import { DIM } from "./palette";
 import { PersonNode } from "./PersonNode";
 import { toFlow } from "./toFlow";
 import { UnionNode } from "./UnionNode";
 import type { ViewRequest } from "./view";
+import { YearFilter } from "./YearFilter";
 
 // Outside the component: React Flow rebuilds everything when these change.
 const nodeTypes = { person: PersonNode, union: UnionNode, junction: JunctionNode };
@@ -28,13 +31,23 @@ const edgeTypes = { routed: RoutedEdge };
 const READABLE_ZOOM = 0.8;
 const REVEAL_MS = 400;
 
+function isFaded(about: string[], dimmed: ReadonlySet<string>): boolean {
+  return about.length > 0 && about.every((id) => dimmed.has(id));
+}
+
 type FamilyTreeProps = {
   family: Family | null;
   selectedId: string | null;
   /** Where the view should go next. Clicking a card is deliberately not this. */
   view: ViewRequest | null;
+  /** Everybody the year filter pushes into the background. */
+  dimmed: ReadonlySet<string>;
+  range: YearRange;
+  /** A field is waiting for a card, so the next click means something else. */
+  isPicking: boolean;
   onSelect: (id: string | null) => void;
   onAdd: (() => void) | null;
+  onRange: (range: YearRange) => void;
 };
 
 /** The provider is what lets the canvas be moved from inside it. */
@@ -46,29 +59,54 @@ export function FamilyTree(props: FamilyTreeProps) {
   );
 }
 
-function Canvas({ family, selectedId, view, onSelect, onAdd }: FamilyTreeProps) {
+function Canvas(props: FamilyTreeProps) {
+  const { family, selectedId, view, dimmed, range, isPicking } = props;
+  const { onSelect, onAdd, onRange } = props;
   const flow = useReactFlow();
   const drawn = useMemo(() => toFlow(family), [family]);
 
-  // Selection is ours rather than React Flow's, because the node array is
-  // rebuilt whenever the document changes and its own flag would not survive.
+  /**
+   * Selection and dimming, applied over the drawing rather than inside it.
+   *
+   * The layout is memoised on the family alone, so neither of these makes it
+   * run again. Selection is ours rather than React Flow's, because the node
+   * array is rebuilt whenever the document changes and its own flag would not
+   * survive.
+   *
+   * A mark is dimmed when *everybody* it is about is outside the range. A line
+   * or a dot leading to somebody still in it is still worth following, so it
+   * stays.
+   */
   const marked = useMemo(
     () =>
-      drawn.nodes.map((node) =>
-        node.type === "person"
-          ? { ...node, data: { ...node.data, isSelected: node.id === selectedId } }
-          : node,
+      drawn.nodes.map((node) => {
+        const about = node.type === "person" ? [node.id] : ((node.data.people ?? []) as string[]);
+        const style = isFaded(about, dimmed) ? { opacity: DIM } : undefined;
+
+        return node.type === "person"
+          ? { ...node, style, data: { ...node.data, isSelected: node.id === selectedId, isPicking } }
+          : { ...node, style };
+      }),
+    [drawn.nodes, selectedId, dimmed, isPicking],
+  );
+
+  const faded = useMemo(
+    () =>
+      drawn.edges.map((edge) =>
+        isFaded((edge.data?.people ?? []) as string[], dimmed)
+          ? { ...edge, style: { ...edge.style, opacity: DIM } }
+          : edge,
       ),
-    [drawn.nodes, selectedId],
+    [drawn.edges, dimmed],
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState(marked);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(drawn.edges);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(faded);
 
   useEffect(() => {
     setNodes(marked);
-    setEdges(drawn.edges);
-  }, [marked, drawn.edges, setNodes, setEdges]);
+    setEdges(faded);
+  }, [marked, faded, setNodes, setEdges]);
 
   /**
    * Answers the standing request, once the drawing can answer it.
@@ -129,7 +167,11 @@ function Canvas({ family, selectedId, view, onSelect, onAdd }: FamilyTreeProps) 
       fitView
     >
       <Panel position="top-left" className="!m-3 flex flex-col items-start gap-2">
-        <AddPerson onAdd={onAdd} />
+        <div className="flex items-center gap-2">
+          <AddPerson onAdd={onAdd} />
+          <YearFilter range={range} onChange={onRange} />
+        </div>
+
         <Legend />
       </Panel>
 

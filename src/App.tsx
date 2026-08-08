@@ -11,8 +11,11 @@ import {
 } from "./family/edit";
 import { parseFamily } from "./family/parse";
 import type { Family } from "./family/schema";
+import { ANY_YEAR, findOutsideRange, type YearRange } from "./family/years";
 import { JsonPanel } from "./features/editor/JsonPanel";
+import { candidatesFor } from "./features/person/kin";
 import { PersonPanel } from "./features/person/PersonPanel";
+import type { PickTarget } from "./features/person/picking";
 import { FamilyTree } from "./features/tree/FamilyTree";
 import type { ViewRequest } from "./features/tree/view";
 import { loadDocument, loadPanelShown, savePanelShown, saveDocument } from "./storage";
@@ -30,6 +33,9 @@ function countOf(people: number): string {
 export default function App() {
   const [text, setText] = useState(() => loadDocument(openingExample.text));
   const [isPanelShown, setIsPanelShown] = useState(() => loadPanelShown(true));
+  // A way of looking at the document, not part of it, so it is not kept.
+  const [range, setRange] = useState<YearRange>(ANY_YEAR);
+  const [picking, setPicking] = useState<PickTarget | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   // Separate from the selection: clicking a card should not move the canvas.
   const [view, setView] = useState<ViewRequest | null>(null);
@@ -80,6 +86,50 @@ export default function App() {
   // out still counts as taken. Guarded by `ok`, which is what makes it parseable.
   const taken = useMemo(() => (result.ok ? idsInUse(text) : []), [result.ok, text]);
 
+  // Worked out from the family on the canvas, so the fading does not flicker
+  // while the document is mid-edit and not being drawn.
+  const dimmed = useMemo(() => findOutsideRange(drawn?.people ?? [], range), [drawn, range]);
+
+  /**
+   * What clicking a card means.
+   *
+   * Ordinarily it opens that person. While a field is armed it fills that
+   * field in instead, and only with somebody the field would have offered
+   * anyway — the pickers leave out a person's own line for a reason, and a
+   * click should not be a way around it. A refused pick stays armed; there was
+   * no way to say no to it, so it has not been used up.
+   */
+  const chooseCard = (id: string | null) => {
+    if (picking === null) {
+      setSelectedId(id);
+      return;
+    }
+
+    if (id === null || selected === null || family === null) {
+      setPicking(null);
+      return;
+    }
+
+    if (!candidatesFor(family.people, selected).some((each) => each.id === id)) return;
+
+    setText(
+      picking === "spouse"
+        ? linkSpouses(text, selected.id, id)
+        : setField(text, selected.id, picking, id),
+    );
+    setPicking(null);
+  };
+
+  // Nothing on the canvas says "not that one", so the keyboard has to.
+  useEffect(() => {
+    if (picking === null) return;
+
+    const drop = (event: KeyboardEvent) => event.key === "Escape" && setPicking(null);
+    window.addEventListener("keydown", drop);
+
+    return () => window.removeEventListener("keydown", drop);
+  }, [picking]);
+
   const fitEverything = () => setView((last) => ({ at: (last?.at ?? 0) + 1, kind: "fit" }));
   const revealPerson = (id: string) =>
     setView((last) => ({ at: (last?.at ?? 0) + 1, kind: "reveal", id }));
@@ -115,7 +165,11 @@ export default function App() {
           family={drawn}
           selectedId={selectedId}
           view={view}
-          onSelect={setSelectedId}
+          dimmed={dimmed}
+          range={range}
+          isPicking={picking !== null}
+          onSelect={chooseCard}
+          onRange={setRange}
           onAdd={
             family &&
             (() => {
@@ -132,6 +186,8 @@ export default function App() {
             person={selected}
             people={family.people}
             taken={taken}
+            picking={picking}
+            onArm={setPicking}
             onSet={(field, value) => setText(setField(text, selected.id, field, value))}
             onRename={(to) => {
               // The selection follows the person, not the name they went by.
@@ -146,8 +202,12 @@ export default function App() {
             onRemove={() => {
               setText(removePerson(text, selected.id));
               setSelectedId(null);
+              setPicking(null);
             }}
-            onClose={() => setSelectedId(null)}
+            onClose={() => {
+              setSelectedId(null);
+              setPicking(null);
+            }}
           />
         )}
       </div>

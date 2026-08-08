@@ -393,6 +393,13 @@ export class Chart {
       target: route.to?.id ?? route.marriage.id,
       kind: route.kind,
       declared: route.kind === "marriage" ? route.marriage.isDeclared : undefined,
+      // The partners, and the child this run ends at when it ends at one.
+      people: [
+        ...new Set([
+          ...route.marriage.partners.map((card) => card.id),
+          ...(route.to ? [route.to.id] : []),
+        ]),
+      ],
       points: route.points,
     }));
 

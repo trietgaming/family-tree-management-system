@@ -1,12 +1,16 @@
 import type { Person } from "../../family/schema";
 import { PersonSelect } from "./PersonSelect";
+import { PickButton } from "./PickButton";
 import { labelOf } from "./kin";
+import { PICK_LABEL } from "./picking";
 
 type SpouseListProps = {
   spouseIds: string[];
   byId: Map<string, Person>;
   /** Everybody who could be added, minus the ones already here. */
   candidates: Person[];
+  isArmed: boolean;
+  onArm: () => void;
   onLink: (id: string) => void;
   onUnlink: (id: string) => void;
 };
@@ -15,7 +19,8 @@ type SpouseListProps = {
  * A list rather than a picker, because a person can have several spouses and
  * removing one has to be as easy as adding it.
  */
-export function SpouseList({ spouseIds, byId, candidates, onLink, onUnlink }: SpouseListProps) {
+export function SpouseList(props: SpouseListProps) {
+  const { spouseIds, byId, candidates, isArmed, onArm, onLink, onUnlink } = props;
   const free = candidates.filter((person) => !spouseIds.includes(person.id));
 
   return (
@@ -41,12 +46,16 @@ export function SpouseList({ spouseIds, byId, candidates, onLink, onUnlink }: Sp
       ))}
 
       {free.length > 0 && (
-        <PersonSelect
-          value=""
-          people={free}
-          blank="Add a spouse…"
-          onChange={(id) => id !== null && onLink(id)}
-        />
+        <div className="flex items-center gap-1.5">
+          <PersonSelect
+            value=""
+            people={free}
+            blank="Add a spouse…"
+            onChange={(id) => id !== null && onLink(id)}
+          />
+
+          <PickButton isArmed={isArmed} what={PICK_LABEL.spouse} onToggle={onArm} />
+        </div>
       )}
     </div>
   );

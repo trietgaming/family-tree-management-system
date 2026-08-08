@@ -1,7 +1,7 @@
 import { BaseEdge, type Edge, type EdgeProps } from "@xyflow/react";
 import type { Point } from "../../family/layout";
 
-export type RoutedEdgeType = Edge<{ points: Point[] }, "routed">;
+export type RoutedEdgeType = Edge<{ points: Point[]; people: string[] }, "routed">;
 
 /**
  * Draws the line the router worked out, and nothing else.

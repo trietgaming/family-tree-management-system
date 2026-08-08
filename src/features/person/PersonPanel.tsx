@@ -1,18 +1,24 @@
 import type { PlainField } from "../../family/edit";
 import type { Person } from "../../family/schema";
+import { yearFrom } from "../../family/years";
 import { Field, inputStyle } from "./Field";
 import { IdField } from "./IdField";
 import { PersonSelect } from "./PersonSelect";
+import { PickButton } from "./PickButton";
 import { SpouseList } from "./SpouseList";
 import { candidatesFor } from "./kin";
+import { PICK_LABEL, type PickTarget } from "./picking";
 
 type PersonPanelProps = {
   person: Person;
   people: Person[];
   /** Every id in the document, including the ones the schema rejected. */
   taken: string[];
+  /** The field waiting for a card to be clicked, if any. */
+  picking: PickTarget | null;
   onSet: (field: PlainField, value: string | number | null) => void;
   onRename: (to: string) => void;
+  onArm: (target: PickTarget | null) => void;
   onLink: (spouseId: string) => void;
   onUnlink: (spouseId: string) => void;
   onRemove: () => void;
@@ -21,18 +27,19 @@ type PersonPanelProps = {
 
 const GENDERS = ["male", "female", "other"] as const;
 
-/** A year typed away to nothing is no year, not the number zero. */
-function yearFrom(typed: string): number | null {
-  const year = Number.parseInt(typed, 10);
-
-  return Number.isNaN(year) ? null : year;
-}
+const PARENTS = [
+  { field: "fatherId", label: "Father" },
+  { field: "motherId", label: "Mother" },
+] as const;
 
 export function PersonPanel(props: PersonPanelProps) {
-  const { person, people, taken, onSet, onRename, onLink, onUnlink, onRemove, onClose } = props;
+  const { person, people, taken, picking, onSet, onRename, onArm } = props;
+  const { onLink, onUnlink, onRemove, onClose } = props;
 
   const byId = new Map(people.map((each) => [each.id, each]));
   const candidates = candidatesFor(people, person);
+
+  const arm = (target: PickTarget) => onArm(picking === target ? null : target);
 
   return (
     <aside className="absolute top-0 right-0 z-10 flex h-full w-72 flex-col gap-3 overflow-y-auto border-l border-slate-200 bg-white p-4 shadow-lg">
@@ -56,6 +63,19 @@ export function PersonPanel(props: PersonPanelProps) {
           className={inputStyle}
         />
       </Field>
+
+      {picking !== null && (
+        <p
+          role="status"
+          className="flex items-center justify-between gap-2 rounded-md bg-slate-900 px-2.5 py-1.5 text-xs text-white"
+        >
+          <span>Click {PICK_LABEL[picking]} on the canvas</span>
+
+          <button type="button" onClick={() => onArm(null)} className="underline underline-offset-2">
+            Cancel
+          </button>
+        </p>
+      )}
 
       <IdField id={person.id} taken={taken} onRename={onRename} />
 
@@ -84,29 +104,32 @@ export function PersonPanel(props: PersonPanelProps) {
         </select>
       </Field>
 
-      <Field label="Father">
-        <PersonSelect
-          value={person.fatherId}
-          people={candidates}
-          blank="Not recorded"
-          onChange={(id) => onSet("fatherId", id)}
-        />
-      </Field>
+      {PARENTS.map(({ field, label }) => (
+        <Field key={field} label={label}>
+          <div className="flex items-center gap-1.5">
+            <PersonSelect
+              value={person[field]}
+              people={candidates}
+              blank="Not recorded"
+              onChange={(id) => onSet(field, id)}
+            />
 
-      <Field label="Mother">
-        <PersonSelect
-          value={person.motherId}
-          people={candidates}
-          blank="Not recorded"
-          onChange={(id) => onSet("motherId", id)}
-        />
-      </Field>
+            <PickButton
+              isArmed={picking === field}
+              what={PICK_LABEL[field]}
+              onToggle={() => arm(field)}
+            />
+          </div>
+        </Field>
+      ))}
 
       <Field label="Spouses">
         <SpouseList
           spouseIds={person.spouseIds ?? []}
           byId={byId}
           candidates={candidates}
+          isArmed={picking === "spouse"}
+          onArm={() => arm("spouse")}
           onLink={onLink}
           onUnlink={onUnlink}
         />

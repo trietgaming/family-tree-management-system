@@ -55,6 +55,19 @@ export class Router {
   }
 
   /**
+   * The row a marriage's bar hangs under.
+   *
+   * The one above its highest child, not the one below its parents. Those are
+   * usually the same row and only differ when a child sits more than one row
+   * down — married to somebody from further along the line, most often. Hanging
+   * the bar under the parents there would leave the drop to that child crossing
+   * every row between, and any card standing in the way.
+   */
+  private barRowOf(marriage: Marriage): number {
+    return Math.min(...marriage.children.map((card) => card.row)) - 1;
+  }
+
+  /**
    * Marriages that cannot use the gap between two cards run below the row, and
    * two of them at one height would read as a single line. Overlapping ones are
    * stacked downwards from the foot of the row.
@@ -91,7 +104,7 @@ export class Router {
       .filter((marriage) => marriage.children.length > 0)
       .map((marriage) => ({
         marriage,
-        row: this.rowOf(marriage),
+        row: this.barRowOf(marriage),
         ...spanOf([marriage.jointX, ...marriage.children.map((card) => card.x)]),
       }));
 
@@ -176,8 +189,10 @@ export class Router {
     const found: Junction[] = [];
 
     // Where the drop leaves the line the two partners share.
+    const people = marriage.peopleIds;
+
     if (marriage.isCouple) {
-      found.push({ id: `${marriage.id}@marriage`, x: jointX, y: lineY, on: "marriage" });
+      found.push({ id: `${marriage.id}@marriage`, x: jointX, y: lineY, on: "marriage", people });
     }
 
     const kids = marriage.children.map((card) => card.x);
@@ -193,7 +208,7 @@ export class Router {
         Number(isNear(x, jointX));
 
       if (arms >= 3) {
-        found.push({ id: `${marriage.id}@${Math.round(x)}`, x, y: barY, on: "descent" });
+        found.push({ id: `${marriage.id}@${Math.round(x)}`, x, y: barY, on: "descent", people });
       }
     }
 

@@ -16,6 +16,11 @@ export type LayoutEdge = {
   kind: "marriage" | "child";
   /** Marriage lines only: both partners named each other. */
   declared?: boolean;
+  /**
+   * Everyone this line joins. `source` and `target` do not say: either can be
+   * a union, which is a joint rather than a person.
+   */
+  people: string[];
   /** The line itself. The only description of it there is. */
   points: Point[];
 };
@@ -29,6 +34,8 @@ export type Junction = {
   x: number;
   y: number;
   on: "marriage" | "descent";
+  /** Everyone whose lines meet here. */
+  people: string[];
 };
 
 export type Layout = {

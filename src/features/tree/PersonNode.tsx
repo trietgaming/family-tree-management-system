@@ -5,6 +5,8 @@ export type PersonData = {
   birthYear?: number;
   gender?: "male" | "female" | "other";
   isSelected?: boolean;
+  /** A field is waiting for a card, so clicking this one fills it in. */
+  isPicking?: boolean;
 };
 
 export type PersonNodeType = Node<PersonData, "person">;
@@ -18,9 +20,9 @@ const ACCENT: Record<string, string> = {
 export function PersonNode({ data }: NodeProps<PersonNodeType>) {
   return (
     <div
-      className={`flex h-full w-full cursor-pointer overflow-hidden rounded-lg border bg-white ${
-        data.isSelected ? "border-slate-900 ring-2 ring-slate-900/20" : "border-slate-300"
-      }`}
+      className={`flex h-full w-full overflow-hidden rounded-lg border bg-white ${
+        data.isPicking ? "cursor-crosshair" : "cursor-pointer"
+      } ${data.isSelected ? "border-slate-900 ring-2 ring-slate-900/20" : "border-slate-300"}`}
     >
       <div className={`w-1 shrink-0 ${ACCENT[data.gender ?? ""] ?? "bg-slate-300"}`} />
 
