@@ -132,9 +132,11 @@ src/
     model.ts       people and unions
     layout/        the drawing, in stages
     id.ts          ids for people created in the app
+    edit.ts        changes, written back into the document as written
   components/      the editor and its path-to-position lookup
   features/
     editor/        the panel, the example picker, the copy button
+    person/        the form behind a card, and its pickers
     tree/          the canvas, its nodes, its edges, the legend
   examples.ts      reads examples/ at build time
   storage.ts       the document, kept between visits
@@ -256,6 +258,16 @@ The editor is built once and only accepts text from outside when it differs
 from what it already holds. Without that, the app's own edits arrive back
 through `onChange` and reset the cursor on every keystroke.
 
+The panel folds away to a narrow rail when the drawing wants the room. Its
+contents are hidden rather than unmounted: the editor is built once and holds
+the undo history, so taking it down to make space would throw that away and put
+it back knowing nothing of what came before. What stays visible is the toggle
+and, when there is something wrong, a badge — the count in red for errors and
+amber for warnings, counting errors on their own because one of them stops the
+drawing and a number mixing the two would hide that. It says that something is
+wrong and how much, not what; clicking it opens the panel, which is where the
+reading is. Whether the panel was left open is remembered between visits.
+
 ## Editing on the canvas
 
 Clicking a card opens a form for that person. Every control writes straight back
@@ -269,7 +281,16 @@ rewrite parts of the document nobody touched. Going through the raw JSON keeps
 the key order and any extra keys; the only thing the app imposes is two-space
 indentation.
 
-Four rules the form follows:
+Five rules the form follows:
+
+- **An id can be changed, and every reference changes with it.** An id is not a
+  field like the others: it is how the document names somebody, so editing one
+  means rewriting every `fatherId`, `motherId`, `spouseIds` and `siblingIds`
+  that mentions them in the same breath. It is refused outright — nothing
+  written — when the result would be empty or would name two people the same,
+  and the box says which. That field alone keeps what was typed rather than
+  writing on every keystroke, because clearing it to retype is an ordinary
+  thing to do and an empty id is not a document.
 
 - **Clearing a field removes it.** Absent and `null` mean the same thing to the
   schema, and absent is what the examples are written in.
@@ -284,7 +305,39 @@ Four rules the form follows:
   is a picker offering the wrong thing.
 
 While the document does not parse there is nothing safe to write back over, so
-the form steps aside until it does.
+the form steps aside until it does, and **Add person** on the canvas greys out
+with it. That button sits on the canvas rather than beside the JSON because the
+canvas is where people are looked at; a new person is appended joined to nobody
+and selected at once, so the form opens ready to name them.
+
+## Moving the view
+
+Two things move the canvas, and they turn out to be the same thing.
+
+Adding a person joined to nobody means the layout gives them a column of their
+own past everything else — on the fifty-seven person file, x=6704 of a drawing
+6880 wide, off screen at any zoom close enough to read. Loading an example is
+the other: a different drawing entirely, under a view aimed at the last one.
+
+Neither can be done in the click that asks for it, because the nodes only exist
+once the document has been read back and laid out. So both are written down as
+a `ViewRequest` and answered later, when the drawing can answer them:
+
+```ts
+type ViewRequest =
+  | { at: number; kind: "fit" }
+  | { at: number; kind: "reveal"; id: string };
+```
+
+`at` counts requests rather than naming them, so loading the example already on
+screen still puts the view back where it started. A request that cannot be
+answered yet is left standing and tried again on the next set of nodes, and the
+one just answered is remembered — the node list is rebuilt on every keystroke,
+and the view must not chase it.
+
+Revealing zooms in only when the view was further out than a card can be read
+at, so a comfortable zoom is never undone. Clicking a card is deliberately not
+a request at all: the view stays exactly where it was put.
 
 Because the layer is text in and text out, it is checked without a browser: an
 edit, an add, a link and a delete run over each example and the result is parsed
@@ -309,7 +362,8 @@ added to the folder.
 
 **Ids are opaque strings.** The examples use readable ones because the JSON is
 meant to be read, but people created in the app get a random ten characters.
-Nothing depends on the format.
+Nothing depends on the format, which is why one can be edited into anything
+that is not already taken.
 
 **Gender is only checked for contradiction.** A father recorded female is
 reported; a father with no gender recorded, or recorded as other, is not. An

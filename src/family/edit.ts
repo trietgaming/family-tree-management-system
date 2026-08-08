@@ -17,6 +17,10 @@ export type PlainField = "name" | "gender" | "birthYear" | "fatherId" | "motherI
 const ID_LISTS = ["spouseIds", "siblingIds"] as const;
 const PARENT_FIELDS = ["fatherId", "motherId"] as const;
 
+function peopleOf(text: string): Written[] {
+  return (JSON.parse(text) as { people: Written[] }).people;
+}
+
 function rewrite(text: string, change: (people: Written[]) => void): string {
   const document = JSON.parse(text) as { people: Written[] };
   change(document.people);
@@ -100,13 +104,63 @@ export function unlinkSpouses(text: string, a: string, b: string): string {
 
 /** Appended, unnamed, and joined to nobody, which is the only blank slate there is. */
 export function addPerson(text: string): { text: string; id: string } {
-  const document = JSON.parse(text) as { people: Written[] };
-  const id = makePersonId(new Set(document.people.map((person) => String(person.id))));
+  const id = makePersonId(new Set(peopleOf(text).map((person) => String(person.id))));
 
   return {
     text: rewrite(text, (people) => people.push({ id, name: "New person" })),
     id,
   };
+}
+
+export function idsInUse(text: string): string[] {
+  return peopleOf(text).map((person) => String(person.id));
+}
+
+/**
+ * Why an id cannot be used, or null when it can.
+ *
+ * Trimmed on both sides of the comparison, because the schema trims before it
+ * looks for duplicates — two ids that differ only in spaces are already the
+ * same person as far as the document is concerned.
+ */
+export function idProblemOf(taken: string[], from: string, to: string): string | null {
+  const settled = to.trim();
+  if (settled === "") return "An id cannot be empty";
+
+  const clash = taken.some((each) => each !== from && each.trim() === settled);
+
+  return clash ? `Another person already has the id "${settled}"` : null;
+}
+
+/**
+ * A new id for a person, carried to every mention of them.
+ *
+ * An id is not a field like the others: it is how the document refers to
+ * somebody, so changing it means rewriting every reference in the same breath.
+ * Refused rather than half applied when the result would name two people the
+ * same, which is an error the document cannot recover from on its own.
+ */
+export function renamePersonId(text: string, from: string, to: string): string | null {
+  if (idProblemOf(idsInUse(text), from, to) !== null) return null;
+
+  const settled = to.trim();
+  const swap = (id: unknown) => (id === from ? settled : id);
+
+  return rewrite(text, (people) => {
+    for (const person of people) {
+      person.id = swap(person.id);
+
+      for (const field of PARENT_FIELDS) {
+        if (person[field] !== undefined) person[field] = swap(person[field]);
+      }
+
+      for (const field of ID_LISTS) {
+        if (person[field] === undefined) continue;
+
+        writeIds(person, field, idsIn(person, field).map(swap) as string[]);
+      }
+    }
+  });
 }
 
 /**

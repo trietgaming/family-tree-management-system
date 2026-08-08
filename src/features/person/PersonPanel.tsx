@@ -1,6 +1,7 @@
 import type { PlainField } from "../../family/edit";
 import type { Person } from "../../family/schema";
 import { Field, inputStyle } from "./Field";
+import { IdField } from "./IdField";
 import { PersonSelect } from "./PersonSelect";
 import { SpouseList } from "./SpouseList";
 import { candidatesFor } from "./kin";
@@ -8,7 +9,10 @@ import { candidatesFor } from "./kin";
 type PersonPanelProps = {
   person: Person;
   people: Person[];
+  /** Every id in the document, including the ones the schema rejected. */
+  taken: string[];
   onSet: (field: PlainField, value: string | number | null) => void;
+  onRename: (to: string) => void;
   onLink: (spouseId: string) => void;
   onUnlink: (spouseId: string) => void;
   onRemove: () => void;
@@ -25,7 +29,7 @@ function yearFrom(typed: string): number | null {
 }
 
 export function PersonPanel(props: PersonPanelProps) {
-  const { person, people, onSet, onLink, onUnlink, onRemove, onClose } = props;
+  const { person, people, taken, onSet, onRename, onLink, onUnlink, onRemove, onClose } = props;
 
   const byId = new Map(people.map((each) => [each.id, each]));
   const candidates = candidatesFor(people, person);
@@ -33,10 +37,7 @@ export function PersonPanel(props: PersonPanelProps) {
   return (
     <aside className="absolute top-0 right-0 z-10 flex h-full w-72 flex-col gap-3 overflow-y-auto border-l border-slate-200 bg-white p-4 shadow-lg">
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <h2 className="truncate text-sm font-semibold text-slate-900">{person.name}</h2>
-          <p className="truncate font-mono text-xs text-slate-400">{person.id}</p>
-        </div>
+        <h2 className="min-w-0 truncate text-sm font-semibold text-slate-900">{person.name}</h2>
 
         <button
           type="button"
@@ -55,6 +56,8 @@ export function PersonPanel(props: PersonPanelProps) {
           className={inputStyle}
         />
       </Field>
+
+      <IdField id={person.id} taken={taken} onRename={onRename} />
 
       <Field label="Born">
         <input
