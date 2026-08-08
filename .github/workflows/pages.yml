@@ -1,0 +1,57 @@
+# Lives inside Task3-FTMS/ so that it lands at the root of the public repo the
+# subtree is pushed to, which is the only place GitHub looks. In the monorepo
+# it sits one folder down and is never run.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time, and a run already going is worth less than the one
+# that overtook it.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Turns Pages on if it is not already, so a fresh clone of this repository
+      # deploys without anybody opening Settings first.
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      # Type checks first: `npm run build` is `tsc -b && vite build`, so a
+      # deployment cannot go out over code that does not compile.
+      - run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

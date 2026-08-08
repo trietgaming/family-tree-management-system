@@ -4,6 +4,10 @@ A family tree you paste in as JSON and watch draw itself. One page, no server:
 the document on the left, the diagram on the right, and nothing between them
 but the code in this folder.
 
+**Live at https://trietgaming.github.io/family-tree-management-system/** — no
+sign in, nothing to set up. It opens on the Simpsons; the picker above the
+editor has thirteen more families, each one chosen to break something.
+
 # Libraries, tools and frameworks
 
 ## Runtime dependencies
@@ -59,6 +63,26 @@ whatever you type is kept for next time.
 `base` is `"./"` in `vite.config.ts`, so one build runs at a domain root and in
 the subdirectory GitHub Pages serves from without being rebuilt. That is safe
 here because the app is a single page with no client-side routing.
+
+## Deployment
+
+GitHub Pages, built by Actions on every push to `main`. The workflow is
+`.github/workflows/pages.yml`: `npm ci`, then `npm run build` — which is
+`tsc -b && vite build`, so nothing that fails to compile can be published —
+then upload `dist/` and deploy it. No secrets and no environment variables:
+the app has no backend to point at.
+
+The code lives in a folder of a larger private repository and is published to
+a public one, because Pages needs a public repository and the exercise asks for
+one. A single subtree push keeps them in step:
+
+```bash
+git subtree push --prefix=Task3-FTMS ftms main
+```
+
+That is why the workflow file sits inside this folder rather than at the top of
+the monorepo: the push makes this folder the root of the public repository, and
+the root is the only place GitHub looks for workflows.
 
 # The document
 
